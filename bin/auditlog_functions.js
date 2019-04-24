@@ -61,30 +61,28 @@ function dumpAuditLog(options) {
         .accept('application/json')
         .type('application/json')
         .send()
-        .end((err, result) = > {
-        if(err !== null;
-)
-    {
-        if ('code' in err) {
-            if (err.code === 'ECONNREFUSED') {
-                util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
-            } else {
-                util.error(sprintf("Error: %s:%s", err.code, err.message));
+        .end((err, result) => {
+            if (err !== null) {
+                if ('code' in err) {
+                    if (err.code === 'ECONNREFUSED') {
+                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                    } else {
+                        util.error(sprintf("Error: %s:%s", err.code, err.message));
+                    }
+                } else {
+                    util.output(err.status + ': ' + err.message);
+                }
+                return 1
             }
-        } else {
-            util.output(err.status + ': ' + err.message);
-        }
-        return 1
-    }
-    if (format === 'json') {
-        util.output(JSON.stringify(result.body));
-    } else {
-        printAuditLogHeader(format);
-        for (let line of result.body) {
-            printAuditLogLine(line, format);
-        }
-    }
-})
+            if (format === 'json') {
+                util.output(JSON.stringify(result.body));
+            } else {
+                printAuditLogHeader(format);
+                for (let line of result.body) {
+                    printAuditLogLine(line, format);
+                }
+            }
+        });
 }
 
 function printAuditLogHeader(format) {

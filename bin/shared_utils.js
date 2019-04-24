@@ -27,10 +27,9 @@ module.exports.error = function (message) {
 };
 
 module.exports.sleep = function (ms) {
-    return new Promise(resolve = > {
+    return new Promise(resolve => {
         setTimeout(resolve, ms)
-    };
-)
+    })
 };
 
 module.exports.optionsFromArgs = function (args, validArguments = null) {

@@ -45,36 +45,34 @@ function listJobs(options) {
         .auth(config.username, config.password)
         .accept('application/json')
         .send()
-        .end((err, res) = > {
-        if(err !== null;
-)
-    {
-        util.output(err.status + ': ' + err.message);
-        return 1
-    }
-    let dataFromServer = res.body;
-    if (Array.isArray(dataFromServer) && 'status' in options) {
-        dataFromServer = reduceArrayToSpecificStatuses(dataFromServer, options['status'])
-    }
+        .end((err, res) => {
+            if (err !== null) {
+                util.output(err.status + ': ' + err.message);
+                return 1
+            }
+            let dataFromServer = res.body;
+            if (Array.isArray(dataFromServer) && 'status' in options) {
+                dataFromServer = reduceArrayToSpecificStatuses(dataFromServer, options['status'])
+            }
 
-    if (Array.isArray(dataFromServer) && 'user' in options) {
-        dataFromServer = reduceArrayToSpecificUsers(dataFromServer, options['user'])
-    }
-    switch (format.toLocaleLowerCase()) {
-        case 'csv':
-            dumpArrayAsCSV(dataFromServer);
-            break;
-        case 'text':
-            dumpArrayAsText(dataFromServer);
-            break;
-        case 'json':
-            dumpArrayAsJson(dataFromServer);
-            break;
-        default:
-            util.error('Unrecognized format');
-            break;
-    }
-})
+            if (Array.isArray(dataFromServer) && 'user' in options) {
+                dataFromServer = reduceArrayToSpecificUsers(dataFromServer, options['user'])
+            }
+            switch (format.toLocaleLowerCase()) {
+                case 'csv':
+                    dumpArrayAsCSV(dataFromServer);
+                    break;
+                case 'text':
+                    dumpArrayAsText(dataFromServer);
+                    break;
+                case 'json':
+                    dumpArrayAsJson(dataFromServer);
+                    break;
+                default:
+                    util.error('Unrecognized format');
+                    break;
+            }
+        });
 }
 
 function pruneJobs(options) {
@@ -100,24 +98,22 @@ function pruneJobs(options) {
         .auth(config.username, config.password)
         .accept('application/json')
         .send()
-        .end((err, res) = > {
-        if(err !== null;
-)
-    {
-        if ('code' in err) {
-            if (err.code === 'ECONNREFUSED') {
-                util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
-            } else {
-                util.error(sprintf("Error: %s:%s", err.code, err.message));
+        .end((err, res) => {
+            if (err !== null) {
+                if ('code' in err) {
+                    if (err.code === 'ECONNREFUSED') {
+                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                    } else {
+                        util.error(sprintf("Error: %s:%s", err.code, err.message));
+                    }
+                } else {
+                    util.output(err.status + ': ' + err.message);
+                }
+                return 1
             }
-        } else {
-            util.output(err.status + ': ' + err.message);
-        }
-        return 1
-    }
-    let jobsPruned = JSON.parse(res.request.response.body);
-    util.output("Pruned " + jobsPruned + " jobs from the database.")
-})
+            let jobsPruned = JSON.parse(res.request.response.body);
+            util.output("Pruned " + jobsPruned + " jobs from the database.")
+        })
 }
 
 function reduceArrayToSpecificStatuses(jsonData, statuses) {
@@ -128,11 +124,10 @@ function reduceArrayToSpecificStatuses(jsonData, statuses) {
     statuses = statuses.toUpperCase();
     statuses = statuses.split(',');
     jsonData = jsonData.filter(
-        (obj) = > {
-        return(statuses.indexOf(obj['status']) >= 0;
-)
-}
-)
+        (obj) => {
+            return (statuses.indexOf(obj['status']) >= 0)
+        }
+    );
     return jsonData;
 }
 
@@ -144,21 +139,20 @@ function reduceArrayToSpecificUsers(jsonData, users) {
     users = users.toLocaleLowerCase();
     users = users.split(',');
     jsonData = jsonData.filter(
-        (obj) = > {
-        let lowerUser = obj['userName'].toLowerCase();
-    return (users.indexOf(lowerUser) >= 0)
-}
-)
+        (obj) => {
+            let lowerUser = obj['userName'].toLowerCase();
+            return (users.indexOf(lowerUser) >= 0)
+        }
+    );
     return jsonData;
 }
 
 function dumpArrayAsCSV(data) {
     if (Array.isArray(data)) {
         util.output(csvLine(null, true));
-        data = data.sort((a, b) = > {
-            return((a.startTime < b.startTime) ? -1 : (a.startTime > b.startTime ? 1 : 0);
-    )
-    })
+        data = data.sort((a, b) => {
+            return ((a.startTime < b.startTime) ? -1 : (a.startTime > b.startTime ? 1 : 0))
+        });
         for (let job of data) {
             util.output(csvLine(job));
         }
@@ -168,10 +162,9 @@ function dumpArrayAsCSV(data) {
 function dumpArrayAsText(data) {
     if (Array.isArray(data)) {
         util.output(textLine(null, true));
-        data = data.sort((a, b) = > {
-            return((a.startTime < b.startTime) ? -1 : (a.startTime > b.startTime ? 1 : 0);
-    )
-    })
+        data = data.sort((a, b) => {
+            return ((a.startTime < b.startTime) ? -1 : (a.startTime > b.startTime ? 1 : 0))
+        });
         for (let job of data) {
             util.output(textLine(job));
         }

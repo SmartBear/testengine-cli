@@ -210,10 +210,9 @@ function executeProject(filename, project, options) {
                     if (projectFile !== null) {
                         zipFile.file(path.basename(projectFile), fs.readFileSync(projectFile, null));
                     } else {
-                        let projectFilesByLength = project['projectFiles'].sort((a, b) = > {
+                        let projectFilesByLength = project['projectFiles'].sort((a, b) => {
                             return a.length - b.length
-                        };
-                    )
+                        });
                         let projectRootPath = path.dirname(projectFilesByLength[0]);
                         for (let compositeProjectFile of project['projectFiles']) {
                             let inZipPath = compositeProjectFile;
@@ -257,45 +256,39 @@ function executeProject(filename, project, options) {
                     .auth(config.username, config.password)
                     .accept('text/plain')
                     .send()
-                    .end((err, result) = > {
-                    if(err === null;
-            )
-                {
-                    let heartbeat = function () {
-                        clearTimeout(this.pingTimeout);
+                    .end((err, result) => {
+                        if (err === null) {
+                            let heartbeat = function () {
+                                clearTimeout(this.pingTimeout);
 
-                        // Use `WebSocket#terminate()` and not `WebSocket#close()`. Delay should be
-                        // equal to the interval at which your server sends out pings plus a
-                        // conservative assumption of the latency.
-                        this.pingTimeout = setTimeout(() = > {
-                            this.terminate();
-                        status = 'DISCONNECTED';
-                    },
-                        300000 + 1000;
-                    )
-                    };
-                    wsAuthToken = result.text;
-                    websocket = new WebSocket(config.server.replace(/^http/, 'ws') + '/api/ws/updates?token=' + wsAuthToken);
-                    websocket.on('open', heartbeat);
-                    websocket.on('ping', heartbeat);
-                    websocket.on('close', function () {
-                        clearTimeout(this.pingTimeout);
-                    });
-                    websocket.on('message', function incoming(data) {
-                        let jsonData = JSON.parse(data);
-                        if ((jobId !== null) && (jsonData['messageType'] === 'EXECUTION_STATUS_UPDATE') && (jobId === jsonData['testJobSummary']['testjobId'])) {
-                            status = jsonData['testJobSummary']['status'];
+                                // Use `WebSocket#terminate()` and not `WebSocket#close()`. Delay should be
+                                // equal to the interval at which your server sends out pings plus a
+                                // conservative assumption of the latency.
+                                this.pingTimeout = setTimeout(() => {
+                                    this.terminate();
+                                    status = 'DISCONNECTED';
+                                }, 300000 + 1000);
+                            };
+                            wsAuthToken = result.text;
+                            websocket = new WebSocket(config.server.replace(/^http/, 'ws') + '/api/ws/updates?token=' + wsAuthToken);
+                            websocket.on('open', heartbeat);
+                            websocket.on('ping', heartbeat);
+                            websocket.on('close', function () {
+                                clearTimeout(this.pingTimeout);
+                            });
+                            websocket.on('message', function incoming(data) {
+                                let jsonData = JSON.parse(data);
+                                if ((jobId !== null) && (jsonData['messageType'] === 'EXECUTION_STATUS_UPDATE') && (jobId === jsonData['testJobSummary']['testjobId'])) {
+                                    status = jsonData['testJobSummary']['status'];
+                                }
+                            });
+                        } else {
+                            status = 'ERROR';
+                            callback(err);
+                            return;
                         }
+                        callback();
                     });
-                }
-            else
-                {
-                    status = 'ERROR';
-                    callback(err);
-                    return;
-                }
-                callback();
-            })
             },
             // Post the payload to TestEngine
             //
@@ -306,28 +299,24 @@ function executeProject(filename, project, options) {
                     .accept('application/json')
                     .type(contentType)
                     .send(payload)
-                    .end((err, result) = > {
-                    if(err === null;
-            )
-                {
-                    status = result.body.status;
-                    if (status === 'PENDING') {
-                        util.error("Project cannot be accepted, files missing:");
-                        for (let missingFile of result.body['unresolvedFiles']) {
-                            util.error('   ' + missingFile['fileName']);
+                    .end((err, result) => {
+                        if (err === null) {
+                            status = result.body.status;
+                            if (status === 'PENDING') {
+                                util.error("Project cannot be accepted, files missing:");
+                                for (let missingFile of result.body['unresolvedFiles']) {
+                                    util.error('   ' + missingFile['fileName']);
+                                }
+                            } else {
+                                jobId = result.body['testjobId'];
+                            }
+                        } else {
+                            status = 'ERROR';
+                            callback(err);
+                            return;
                         }
-                    } else {
-                        jobId = result.body['testjobId'];
-                    }
-                }
-            else
-                {
-                    status = 'ERROR';
-                    callback(err);
-                    return;
-                }
-                callback();
-            })
+                        callback();
+                    });
             },
             function (callback) {
                 async.whilst(
@@ -340,27 +329,20 @@ function executeProject(filename, project, options) {
                                 && (status !== 'FINISHED')
                                 && (status !== 'DISCONNECTED')));
                     },
-                    async;
-
-                function () {
-                    await;
-                    util.sleep(200);
-                }
-
-            ,
-
-                function () {
-                    // callback();
-                    if (websocket !== null) {
-                        websocket.close();
+                    async function () {
+                        await util.sleep(200);
+                    },
+                    function () {
+                        // callback();
+                        if (websocket !== null) {
+                            websocket.close();
+                        }
+                        if (status === 'DISCONNECTED') {
+                            util.error("Disconnected from TestEngine, please visit " + config.server + " for more info.")
+                        }
+                        callback();
                     }
-                    if (status === 'DISCONNECTED') {
-                        util.error("Disconnected from TestEngine, please visit " + config.server + " for more info.")
-                    }
-                    callback();
-                }
-
-            )
+                );
             }
         ],
         function (res) {
@@ -402,18 +384,14 @@ function executeProject(filename, project, options) {
                                 .auth(config.username, config.password)
                                 .accept('application/junit+xml')
                                 .send()
-                                .end((err, result) = > {
-                                if(err === null;
-                        )
-                            {
-                                fs.writeFileSync(options['output'] + '/' + reportFilename, result.body);
-                            }
-                        else
-                            {
-                                util.error(err);
-                                process.exit(2);
-                            }
-                        })
+                                .end((err, result) => {
+                                    if (err === null) {
+                                        fs.writeFileSync(options['output'] + '/' + reportFilename, result.body);
+                                    } else {
+                                        util.error(err);
+                                        process.exit(2);
+                                    }
+                                })
                         } else {
                             util.error("Output folder exists but is not a directory")
                         }
