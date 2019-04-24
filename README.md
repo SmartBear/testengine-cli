@@ -7,7 +7,7 @@ effectively using a command line tool. This is a node.js based CLI to do just th
 The tool can handle most administration of the server as well as submitting test jobs.
 
 ## Usage
-All communication with the ReadyAPI TestEngine requires three things.
+All communication with the ReadyAPI TestEngine requires three settings.
 * URL to TestEngine
 * user name
 * password
