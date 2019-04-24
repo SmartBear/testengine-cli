@@ -137,8 +137,9 @@ who terminated a job, when users are added, deleted or modified, etc. The tool l
 for a specific date range. You can also get an audit trail for a specific user (by adding a username to the command 
 line). To make it easier to process the log, it can be printed not just as text but also as csv or json. 
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> auditlog dump [format=text/csv/json] [user=username] [date=YYYY-MM-DD[:YYYY-MM-DD]] ]`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> auditlog dump [format=text/csv/json] [limit=n] [user=username] [date=YYYY-MM-DD[:YYYY-MM-DD]] ]`
 
 The date can be either a date on the format YYYY-MM-DD or a range on the format YYYY-MM-DD:YYYY-MM-DD. If the date is
-omitted all data in the auditlog is returned. 
+omitted all data in the auditlog is returned. By specifying `limit` it is possible to limit the amount of lines to a
+set number.
 

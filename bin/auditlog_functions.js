@@ -13,10 +13,10 @@ module.exports.dispatcher = function (args) {
     switch (args[0].toLowerCase()) {
         case 'dump':
             if (args.length < 1) {
-                util.error("Usage: " + program.name() + " auditlog dump [format=text/csv/json>] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
+                printModuleHelp();
             } else {
                 let options = util.optionsFromArgs(args.splice(1), [
-                    'format', 'date', 'user']);
+                    'format', 'date', 'user', 'limit']);
                 dumpAuditLog(options)
             }
 
@@ -33,7 +33,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: " + program.name() + " auditlog <command>");
     util.error("Commands: ");
-    util.error("   dump [format=text/csv/json>] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
+    util.error("   dump [format=text/csv/json>] [limit=n] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
     util.error("   help");
 }
 
@@ -75,11 +75,20 @@ function dumpAuditLog(options) {
                 return 1
             }
             if (format === 'json') {
-                util.output(JSON.stringify(result.body));
+                if ('limit' in options) {
+                    util.output(JSON.stringify(result.body.slice(0, options['limit'])));
+                } else {
+                    util.output(JSON.stringify(result.body));
+                }
             } else {
                 printAuditLogHeader(format);
+                let counter = 0;
+                let maxItems = 'limit' in options?options['limit']:1e10;
                 for (let line of result.body) {
                     printAuditLogLine(line, format);
+                    counter++;
+                    if (counter >= maxItems)
+                        break;
                 }
             }
         });
