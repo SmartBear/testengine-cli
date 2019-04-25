@@ -179,8 +179,7 @@ function getQueryStringFromOptions(options) {
 function executeProject(filename, project, options) {
     let projectFile = null;
     let isZipFile = false;
-    let postUrl = config.server + '/api/v1/testjobs';
-    let statusUrl = config.server + '/api/v1/testjobs';
+    let endPoint = config.server + '/api/v1/testjobs';
     let contentType = 'application/xml';
     let payload = null;
     let files = null;
@@ -301,7 +300,7 @@ function executeProject(filename, project, options) {
             // Post the payload to TestEngine
             //
             function (callback) {
-                let url = postUrl + ((queryString.length > 0) ? '?' + queryString : '');
+                let url = endPoint + ((queryString.length > 0) ? '?' + queryString : '');
                 if (missingFiles) {
                     callback();
                     return;
@@ -393,7 +392,7 @@ function executeProject(filename, project, options) {
                                 if (!reportFilename.endsWith(".xml")) {
                                     reportFilename += '.xml';
                                 }
-                                let url = statusUrl + '/' + jobId + '/report';
+                                let url = endPoint + '/' + jobId + '/report';
                                 request.get(url)
                                     .auth(config.username, config.password)
                                     .accept('application/junit+xml')
