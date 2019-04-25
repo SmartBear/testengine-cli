@@ -198,6 +198,7 @@ function executeProject(filename, project, options) {
         files = extractFilesFromJsonRepresentation(project, options);
         projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
     }
+    let missingFiles = false;
     async.series([
             // First create a zip file, if needed.
             //
@@ -225,7 +226,8 @@ function executeProject(filename, project, options) {
                     }
                     for (let file of files) {
                         if (!fs.existsSync(file)) {
-                            util.error("File missing: " + file);
+                            util.error("Referenced file missing: " + file);
+                            missingFiles=true;
                         }
                         let buffer = fs.readFileSync(file, null);
                         zipFile.file(path.basename(file), buffer);
@@ -244,6 +246,7 @@ function executeProject(filename, project, options) {
                         payload = fs.readFileSync(projectFile, {encoding: null});
                     } else {
                         util.error("Missing project to send to server");
+                        missingFiles=true;
                     }
                     callback();
                 }
@@ -252,6 +255,10 @@ function executeProject(filename, project, options) {
             // Setup the websocket
             //
             function (callback) {
+                if (missingFiles) {
+                    callback();
+                    return;
+                }
                 request.get(config.server + '/api/v1/token')
                     .auth(config.username, config.password)
                     .accept('text/plain')
@@ -294,6 +301,11 @@ function executeProject(filename, project, options) {
             //
             function (callback) {
                 let url = postUrl + ((queryString.length > 0) ? '?' + queryString : '');
+                if (missingFiles) {
+                    callback();
+                    return;
+                }
+
                 request.post(url)
                     .auth(config.username, config.password)
                     .accept('application/json')
@@ -334,7 +346,7 @@ function executeProject(filename, project, options) {
                     },
                     function () {
                         // callback();
-                        if (websocket !== null) {
+                        if ((websocket !== null) && (websocket.readyState !== 0)) {
                             websocket.close();
                         }
                         if (status === 'DISCONNECTED') {
