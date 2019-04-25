@@ -228,6 +228,7 @@ function executeProject(filename, project, options) {
                         if (!fs.existsSync(file)) {
                             util.error("Referenced file missing: " + file);
                             missingFiles=true;
+                            continue;
                         }
                         let buffer = fs.readFileSync(file, null);
                         zipFile.file(path.basename(file), buffer);
