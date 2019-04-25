@@ -278,7 +278,7 @@ function executeProject(filename, project, options) {
                             });
                             websocket.on('message', function incoming(data) {
                                 let jsonData = JSON.parse(data);
-                                if ((jobId !== null) && (jsonData['messageType'] === 'EXECUTION_STATUS_UPDATE') && (jobId === jsonData['testJobSummary']['testjobId'])) {
+                                if ((jobId !== null) && (jsonData['messageType'] === 'TESTJOB_STATUS_UPDATE') && (jobId === jsonData['testJobSummary']['testjobId'])) {
                                     status = jsonData['testJobSummary']['status'];
                                 }
                             });
