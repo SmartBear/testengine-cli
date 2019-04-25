@@ -378,35 +378,36 @@ function executeProject(filename, project, options) {
             } else {
                 // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
                 //
-                util.output("TestJob result: " + status);
-                if ((jobId !== null)
-                    && ((status !== 'CANCELED')
-                        && (status !== 'PENDING')
-                        && (status !== 'DISCONNECTED'))) {
-                    if ('output' in options) {
-                        if (!fs.existsSync(options['output'])) {
-                            fs.mkdirSync(options['output']);
-                        }
-                        if (fs.existsSync(options['output']) && fs.lstatSync(options['output']).isDirectory()) {
-                            let reportFilename = 'junit-' + path.basename(filename);
-                            if (!reportFilename.endsWith(".xml")) {
-                                reportFilename += '.xml';
+                if (!missingFiles) {
+                    util.output("TestJob result: " + status);
+                    if ((jobId !== null)
+                        && ((status !== 'CANCELED')
+                            && (status !== 'PENDING')
+                            && (status !== 'DISCONNECTED'))) {
+                        if ('output' in options) {
+                            if (!fs.existsSync(options['output'])) {
+                                fs.mkdirSync(options['output']);
                             }
-                            let url = statusUrl + '/' + jobId + '/report';
-                            request.get(url)
-                                .auth(config.username, config.password)
-                                .accept('application/junit+xml')
-                                .send()
-                                .end((err, result) => {
-                                    if (err === null) {
-                                        fs.writeFileSync(options['output'] + '/' + reportFilename, result.body);
-                                    } else {
-                                        util.error(err);
-                                        process.exit(2);
-                                    }
-                                })
-                        } else {
-                            util.error("Output folder exists but is not a directory")
+                            if (fs.existsSync(options['output']) && fs.lstatSync(options['output']).isDirectory()) {
+                                let reportFilename = 'junit-' + path.basename(filename);
+                                if (!reportFilename.endsWith(".xml")) {
+                                    reportFilename += '.xml';
+                                }
+                                let url = statusUrl + '/' + jobId + '/report';
+                                request.get(url)
+                                    .auth(config.username, config.password)
+                                    .accept('application/junit+xml')
+                                    .send()
+                                    .end((err, result) => {
+                                        if (err === null) {
+                                            fs.writeFileSync(options['output'] + '/' + reportFilename, result.body);
+                                        } else {
+                                            util.error(err);
+                                        }
+                                    })
+                            } else {
+                                util.error("Output folder exists but is not a directory")
+                            }
                         }
                     }
                 }
