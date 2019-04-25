@@ -82,16 +82,9 @@ function pruneJobs(options) {
         let matchResult = options['before'].match(singleDateRE);
         if (matchResult && matchResult.length === 4) {
             let date = new Date(parseInt(matchResult[1]), parseInt(matchResult[2]) - 1, parseInt(matchResult[3]));
-            url += '?before=';
-            url += date.getFullYear();
-            url += '-';
-            if (date.getMonth() + 1 < 10)
-                url += '0';
-            url += date.getMonth() + 1;
-            url += '-';
-            if (date.getDate() < 10)
-                url += '0';
-            url += date.getDate();
+            let tmpDate = date.toISOString();
+            tmpDate = tmpDate.replace('.000Z', 'Z');
+            url += '?before='+encodeURIComponent(tmpDate);
         }
     }
     request.delete(url)
