@@ -50,7 +50,8 @@ on to run the job. When `<project-file>` points to a zip file, the zip file is e
 just like if it was an exported project from ReadyAPI.
 When sending encrypted projects to TestEngine (specifying projectPassword) the command line interface will do its best
 to find files the project is depending on. However, if the entire project is encrypted it will not succeed and the best
-alternative is to create a zip file with the dependencies and the project and send it to TestEngine.
+alternative, if the project depends on external files, is to create a zip file with the dependencies and the project and 
+send it to TestEngine.
 
 **options** is a set of options which can be specified to tell TestEngine what to run in the project, the following
 table includes the currently implemented options.
@@ -67,7 +68,7 @@ table includes the currently implemented options.
 | proxyPort | 8888  | Port of the proxyHost to contact for outgoing requests (from TestEngine)|
 | proxyUser | John  | Optional username to authenticate with the proxy|
 | proxyPassword | Secret!| Optional password to authenticate with the proxy|
-| projectPassword | abc123 | Password to unlock the project file (or password protected properties). Password protected projects needs to be sent to TestEngine in a manually created zip file with all dependencies in the zip file root. Projects configured to only have specific properties encrypted will work as normal projects but require this parameter.|
+| projectPassword | abc123 | Password to unlock the project file (or password protected properties). Password protected projects which are depending on external files (data sources, attachments, certificates etc.) needs to be sent to TestEngine in a manually created zip file with all dependencies in the zip file root. Projects configured to only have specific properties encrypted will work as normal projects but require this parameter.|
 
 If the user exits the CLI while the job is being run, it will output the command to use to cancel the job.
 e.g.

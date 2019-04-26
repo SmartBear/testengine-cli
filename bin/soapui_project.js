@@ -29,7 +29,7 @@ module.exports.parse = function (filename) {
         throw "'" + filename + "' does not seem to be a soapUI project file";
     }
     if ('con:encryptedContent' in jsonProject['con:soapui-project']) {
-        throw "'" + filename + "' is encrypted and needs to be sent to the server as a zip file";
+        throw "'" + filename + "' is encrypted and may have to be sent to the server as a zip file";
     }
     if ("con:soapui-project" in jsonProject) {
         result = postProcessStructure(jsonProject);

@@ -1,6 +1,5 @@
 'use strict';
 
-const program = require('commander');
 const process = require('process');
 const request = require('superagent');
 const config = require('./config').config;
@@ -23,6 +22,7 @@ module.exports.dispatcher = function (args) {
         'testcase',
         'testsuite',
         'tags',
+        'environment',
         'output',
         'proxyHost',
         'proxyPort',
@@ -49,7 +49,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] ");
+    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -73,6 +73,8 @@ function conflictingOptionsCheck(options) {
 
 function extractFilesFromJsonRepresentation(data, options) {
     let result = [];
+    if (data === null)
+        return result;
     let target = data;
     if (options && ('testsuite' in options)) {
         let testSuiteName = options['testsuite'];
@@ -128,6 +130,9 @@ function runProject(filename, options) {
             executeProject(filename, project, options);
         } catch (err) {
             util.error(err);
+            if (err.match(/is encrypted/)) {
+                executeProject(filename, null, options);
+            }
         }
     } else {
         util.error("Cannot open file: " + filename);
@@ -159,6 +164,9 @@ function getQueryStringFromOptions(options) {
             }
             case 'projectPassword':
                 queryString += 'projectPassword=' + encodeURI(options[key]);
+                break;
+            case 'environment':
+                queryString += 'environment=' + encodeURI(options[key]);
                 break;
             case 'proxyUser':
                 queryString += 'proxyUsername=' + encodeURI(options[key]);
@@ -194,8 +202,13 @@ function executeProject(filename, project, options) {
         projectFile = filename;
         isZipFile = true;
     } else {
-        files = extractFilesFromJsonRepresentation(project, options);
-        projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
+        if (project !== null) {
+            files = extractFilesFromJsonRepresentation(project, options);
+            projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
+        } else {
+            files=[];
+            projectFile = filename;
+        }
     }
 
     process.on("exit", function () {
@@ -210,7 +223,7 @@ function executeProject(filename, project, options) {
             // First create a zip file, if needed.
             //
             function (callback) {
-                if (!isZipFile && ((files.length > 0) || (project['projectFiles'].length > 1))) {
+                if (!isZipFile && (project !== null) && ((files.length > 0) || (project['projectFiles'].length > 1))) {
                     // We depend on files, we need to create and send a zip file
                     contentType = 'application/zip';
                     let zipFile = new JSZip();
@@ -322,18 +335,27 @@ function executeProject(filename, project, options) {
                     .end((err, result) => {
                         if (err === null) {
                             status = result.body.status;
-                            if (status === 'PENDING') {
-                                util.error("Project cannot be accepted, files missing:");
-                                for (let missingFile of result.body['unresolvedFiles']) {
-                                    util.error('   ' + missingFile['fileName']);
-                                }
-                            } else {
-                                jobId = result.body['testjobId'];
-                            }
+                            jobId = result.body['testjobId'];
+                            if (config.verbose)
+                                util.output("TestjoB ID: "+jobId);
                         } else {
                             status = 'ERROR';
-                            callback(err);
-                            return;
+                            if ('status' in err) {
+                                switch(err['status']) {
+                                    case 412:
+                                        if (Array.isArray(result.body)) {
+                                            util.error("Project cannot be accepted, files missing:");
+                                            for (let missingFile of result.body) {
+                                                util.error('   ' + missingFile['fileName']);
+                                            }
+                                        }
+                                        break;
+                                    default:
+                                        util.error(err['status']+': '+err['message']);
+                                        callback(err);
+                                        return;
+                                }
+                            }
                         }
                         callback();
                     });
@@ -386,7 +408,7 @@ function executeProject(filename, project, options) {
                 // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
                 //
                 if (!missingFiles) {
-                    util.output("TestJob result: " + status);
+                    util.output("Result: " + status);
                     if ((jobId !== null)
                         && ((status !== 'CANCELED')
                             && (status !== 'PENDING')
@@ -418,6 +440,7 @@ function executeProject(filename, project, options) {
                         }
                     }
                 }
+                jobId = null;
             }
         }
     );
