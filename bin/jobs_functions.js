@@ -28,7 +28,7 @@ module.exports.dispatcher = function (args) {
             let options = util.optionsFromArgs(args.splice(1), [
                 'before']);
             if ((argumentCount > 1) && (!('before' in options)) ) {
-                util.output('Unknown argument to testengine jobs prune: ');
+                util.output('Unknown argument to testengine jobs prune.');
             }
             pruneJobs(options);
             break;

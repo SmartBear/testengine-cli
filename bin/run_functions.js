@@ -201,7 +201,7 @@ function executeProject(filename, project, options) {
     process.on("exit", function () {
         //graceful shutdown
         if (jobId) {
-            util.output("To cancel the job started, please use:\n  " + program.name() + " jobs cancel " + jobId);
+            util.output("To cancel the job started, please use:\n  testengine jobs cancel " + jobId);
         }
     });
 
