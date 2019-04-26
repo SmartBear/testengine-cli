@@ -69,6 +69,13 @@ table includes the currently implemented options.
 | proxyPassword | Secret!| Optional password to authenticate with the proxy|
 | projectPassword | abc123 | Password to unlock the project file (or password protected properties). Password protected projects needs to be sent to TestEngine in a manually created zip file with all dependencies in the zip file root. Projects configured to only have specific properties encrypted will work as normal projects but require this parameter.|
 
+If the user exits the CLI while the job is being run, it will output the command to use to cancel the job.
+e.g.
+```
+^CTo cancel the job started, please use:
+     testengine jobs cancel 61b0baef-b661-469e-9a96-d546ef20e889
+```
+
 ### List jobs on the server
 To get a list of jobs from the server, execute the following command:
 
@@ -83,6 +90,11 @@ following the list command, it is also possible to specify optjions to select fo
 | user  | (joe, adam)  | Get all jobs submitted by joe or adam|
 | status| FAILED | Get all jobs with a status "FAILED"|
 | status| (FAILED,CANCELED)  | Get all jobs which was either canceled or failed|
+
+### Cancel a running job
+Each job has a job ID, with the command "jobs cancel" a running (or queued) job can be canceled.
+`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> jobs cancel <job ID>`
+
 
 ### Clean up old jobs from the server database
 To remove old jobs from the server (to preserve disk space or limit the risk of data leakage), you can use the prune command:
