@@ -197,6 +197,14 @@ function executeProject(filename, project, options) {
         files = extractFilesFromJsonRepresentation(project, options);
         projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
     }
+
+    process.on("exit", function () {
+        //graceful shutdown
+        if (jobId) {
+            util.output("To cancel the job started, please use:\n  " + program.name() + " jobs cancel " + jobId);
+        }
+    });
+
     let missingFiles = false;
     async.series([
             // First create a zip file, if needed.
@@ -226,7 +234,7 @@ function executeProject(filename, project, options) {
                     for (let file of files) {
                         if (!fs.existsSync(file)) {
                             util.error("Referenced file missing: " + file);
-                            missingFiles=true;
+                            missingFiles = true;
                             continue;
                         }
                         let buffer = fs.readFileSync(file, null);
@@ -246,7 +254,7 @@ function executeProject(filename, project, options) {
                         payload = fs.readFileSync(projectFile, {encoding: null});
                     } else {
                         util.error("Missing project to send to server");
-                        missingFiles=true;
+                        missingFiles = true;
                     }
                     callback();
                 }

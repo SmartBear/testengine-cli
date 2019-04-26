@@ -16,6 +16,14 @@ module.exports.dispatcher = function (args) {
             listJobs(options);
             break;
         }
+        case 'cancel': {
+            if (args.length < 2) {
+                printModuleHelp();
+            } else {
+                terminateTestJob(args[1]);
+            }
+            break;
+        }
         case 'prune': {
             let options = util.optionsFromArgs(args.splice(1), [
                 'before']);
@@ -35,8 +43,25 @@ function printModuleHelp() {
     util.error("Usage: " + program.name() + " jobs <command>");
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
+    util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
     util.error("   help");
+}
+
+function terminateTestJob(testjobId) {
+    let url = config.server + '/api/v1/testjobs'+ '/' + testjobId;
+    util.output('Canceling job: '+testjobId);
+    request.delete(url)
+        .auth(config.username, config.password)
+        .accept('application/junit+xml')
+        .send()
+        .end((err, ) => {
+            if (err !== null) {
+                util.error(err);
+            } else {
+                util.output('Successfully canceled job');
+            }
+        })
 }
 
 function listJobs(options) {
