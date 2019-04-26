@@ -1,6 +1,5 @@
 'use strict';
 
-const program = require('commander');
 const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
@@ -15,7 +14,7 @@ module.exports.dispatcher = function(args) {
     switch (args[0].toLowerCase()) {
         case 'add':
             if (args.length < 3) {
-                util.error("Usage: " + program.name() + " user add <username> <password>");
+                util.error("Usage: testengine user add <username> <password>");
             } else {
                 addUser(args[1], args[2])
             }
@@ -23,7 +22,7 @@ module.exports.dispatcher = function(args) {
 
         case 'import':
             if (args.length < 2) {
-                util.error("Usage: " + program.name() + " user import <file/url>");
+                util.error("Usage: testengine user import <file/url>");
             } else {
                 importUsers(args[1])
             }
@@ -31,7 +30,7 @@ module.exports.dispatcher = function(args) {
 
         case 'edit':
             if (args.length < 3) {
-                util.error("Usage: " + program.name() + " user edit <username> [password=newpassword] [admin=true/false]");
+                util.error("Usage: testengine user edit <username> [password=newpassword] [admin=true/false]");
             } else {
                 let options = util.optionsFromArgs(args.splice(2), [
                     'password', 'admin']);
@@ -51,7 +50,7 @@ module.exports.dispatcher = function(args) {
         case 'del':
         case 'delete':
             if (args.length < 2) {
-                return util.error("Usage: " + program.name() + " user delete <username>");
+                return util.error("Usage: testengine user delete <username>");
             } else {
                 deleteUser(args[1]);
             }
@@ -66,7 +65,7 @@ module.exports.dispatcher = function(args) {
 };
 
 function printModuleHelp() {
-    util.error("Usage: " + program.name() + " user <command>");
+    util.error("Usage: testengine user <command>");
     util.error("Commands: ");
     util.error("   add <username> <password>");
     util.error("   edit <username> [password=newpassword] [admin=true/false]");

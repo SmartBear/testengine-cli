@@ -1,6 +1,5 @@
 'use strict';
 
-const program = require('commander');
 const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
@@ -31,7 +30,7 @@ module.exports.dispatcher = function (args) {
 };
 
 function printModuleHelp() {
-    util.error("Usage: " + program.name() + " auditlog <command>");
+    util.error("Usage: testengine auditlog <command>");
     util.error("Commands: ");
     util.error("   dump [format=text/csv/json>] [limit=n] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
     util.error("   help");

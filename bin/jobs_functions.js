@@ -1,5 +1,4 @@
 'use strict';
-const program = require('commander');
 const util = require('./shared_utils');
 const request = require('superagent');
 const config = require('./config').config;
@@ -25,8 +24,12 @@ module.exports.dispatcher = function (args) {
             break;
         }
         case 'prune': {
+            let argumentCount = args.length;
             let options = util.optionsFromArgs(args.splice(1), [
                 'before']);
+            if ((argumentCount > 1) && (!('before' in options)) ) {
+                util.output('Unknown argument to testengine jobs prune: ');
+            }
             pruneJobs(options);
             break;
         }
@@ -40,7 +43,7 @@ module.exports.dispatcher = function (args) {
 };
 
 function printModuleHelp() {
-    util.error("Usage: " + program.name() + " jobs <command>");
+    util.error("Usage: testengine jobs <command>");
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
     util.error("   cancel <testjobId>");

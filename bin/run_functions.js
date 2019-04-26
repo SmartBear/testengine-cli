@@ -47,7 +47,7 @@ module.exports.dispatcher = function (args) {
 };
 
 function printModuleHelp() {
-    util.error("Usage: " + program.name() + " run <command>");
+    util.error("Usage: testengine run <command>");
     util.error("Commands: ");
     util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] ");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
