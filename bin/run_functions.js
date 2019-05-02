@@ -131,7 +131,10 @@ function runProject(filename, options) {
         } catch (err) {
             util.error(err);
             if (err.match(/is encrypted/)) {
-                executeProject(filename, null, options);
+                if (!('projectPassword' in options))
+                    util.error('Error: Submitting encrypted projects without projectPassword will not work');
+                else
+                    executeProject(filename, null, options);
             }
         }
     } else {
