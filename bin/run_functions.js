@@ -174,7 +174,6 @@ function getQueryStringFromOptions(options) {
             case 'proxyUser':
                 queryString += 'proxyUsername=' + encodeURI(options[key]);
                 break;
-            case 'proxyUsername':
             case 'proxyPassword':
             case 'proxyHost':
             case 'proxyPort':
