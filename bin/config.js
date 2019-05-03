@@ -10,7 +10,8 @@ let config = {
     verbose: false,
     username: null,
     password: null,
-    server: null
+    server: null,
+    showProgress: false
 };
 
 function readConfigFromFile(filename) {
@@ -41,13 +42,17 @@ function initConfig() {
     }
 
     if (program.quiet) {
-        config.quiet = true
+        config.quiet = true;
     }
 
     if (program.verbose) {
-        config.verbose = true
+        config.verbose = true;
     }
 
+    if (program.progress) {
+        config.showProgress = true;
+    }
+    
     if (program.username) {
         config.username = program.username
     }

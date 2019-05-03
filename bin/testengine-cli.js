@@ -20,6 +20,7 @@ program
     .option('-p, --password <password>', 'TestEngine password')
     .option('-H, --host <hostname>', 'TestEngine host/url')
     .option('-v, --verbose', 'Enable Verbose output')
+    .option('-P, --progress', 'Indicate progress')
     .parse(process.argv);
 
 if (program.args.length === 0) {

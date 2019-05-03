@@ -16,10 +16,12 @@ module.exports.booleanValue = function (unknownValue) {
 };
 
 
-module.exports.output = function (message) {
-    if (!config.quiet)
-        process.stdout.write(message + '\n');
-
+module.exports.output = function (message, appendNewLine=true) {
+    if (!config.quiet) {
+        process.stdout.write(message);
+        if (appendNewLine)
+            process.stdout.write('\n');
+    }
 };
 
 module.exports.error = function (message) {

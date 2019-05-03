@@ -130,11 +130,13 @@ function runProject(filename, options) {
             executeProject(filename, project, options);
         } catch (err) {
             util.error(err);
-            if (err.match(/is encrypted/)) {
-                if (!('projectPassword' in options))
-                    util.error('Error: Submitting encrypted projects without projectPassword will not work');
-                else
-                    executeProject(filename, null, options);
+            if (typeof err === 'string') {
+                if (err.match(/is encrypted/)) {
+                    if (!('projectPassword' in options))
+                        util.error('Error: Submitting encrypted projects without projectPassword will not work');
+                    else
+                        executeProject(filename, null, options);
+                }
             }
         }
     } else {
@@ -352,6 +354,9 @@ function executeProject(filename, project, options) {
                                             }
                                         }
                                         break;
+                                    case 400:
+                                        util.error('Error: ' +result.body['message']);
+                                        break;
                                     default:
                                         util.error(err['status']+': '+err['message']);
                                         callback(err);
@@ -363,6 +368,7 @@ function executeProject(filename, project, options) {
                     });
             },
             function (callback) {
+                let counter = 0;
                 async.whilst(
                     function () {
                         return ((jobId !== null)
@@ -374,6 +380,11 @@ function executeProject(filename, project, options) {
                                 && (status !== 'DISCONNECTED')));
                     },
                     async function () {
+                        if (config.showProgress) {
+                            counter++;
+                            if ((counter % 5) == 0)
+                                util.output('.', false);
+                        }
                         await util.sleep(200);
                     },
                     function () {
@@ -410,6 +421,8 @@ function executeProject(filename, project, options) {
                 // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
                 //
                 if (!missingFiles) {
+                    if (config.showProgress)
+                        util.output('');
                     util.output("Result: " + status);
                     if ((jobId !== null)
                         && ((status !== 'CANCELED')

@@ -82,8 +82,13 @@ function postProcessStructure(jsonProject) {
     };
 
     let testsuites = jsonProject['con:soapui-project']['con:testSuite'];
-    if (!Array.isArray(testsuites))
+    if (!testsuites) {
+        return result;
+    }
+
+    if (!Array.isArray(testsuites)) {
         testsuites = [testsuites];
+    }
     for (let testSuite of testsuites) {
         let testSuiteData = processTestSuite(testSuite);
         result.testSuites.push(testSuiteData);
