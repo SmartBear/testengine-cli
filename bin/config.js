@@ -34,10 +34,11 @@ function initConfig() {
 
     if (program.config && fs.existsSync(program.config)) {
         if (!program.quiet && program.verbose)
-            process.stdout.write('Reading config from ' + program.config + '\n');
+            process.stdout.write('Reading configuration from ' + program.config + '\n');
+        readConfigFromFile(program.config);
     } else if (fs.existsSync(os.homedir() + '/.testengine.conf')) {
             if (!program.quiet && program.verbose)
-                process.stdout.write('Reading config from ' + os.homedir() + '/.testengine.conf\n');
+                process.stdout.write('Reading configuration from ' + os.homedir() + '/.testengine.conf\n');
             readConfigFromFile(os.homedir() + '/.testengine.conf');
     }
 
