@@ -36,9 +36,9 @@ function initConfig() {
         if (!program.quiet && program.verbose)
             process.stdout.write('Reading config from ' + program.config + '\n');
     } else if (fs.existsSync(os.homedir() + '/.testengine.conf')) {
-        if (!program.quiet && program.verbose)
-            process.stdout.write('Reading config from ' + os.homedir() + '/.testengine.conf\n');
-        readConfigFromFile(os.homedir() + '/.testengine.conf');
+            if (!program.quiet && program.verbose)
+                process.stdout.write('Reading config from ' + os.homedir() + '/.testengine.conf\n');
+            readConfigFromFile(os.homedir() + '/.testengine.conf');
     }
 
     if (program.quiet) {
