@@ -41,7 +41,7 @@ testjob and send them together with the project file to the server.
 
 To submit a project to be run, the basic command is as follows:
 
-`testengine -u <user name> -p <user password> -H http://<url to testsever> run project [options] <project-file>`
+`testengine -u <user name> -p <user password> -H http://<url to TestEngine> run project [options] <project-file>`
 
 In the command line above, the <project filename> can be eiter a project file (.xml), a directory with a composite 
 project or a zip file (either exported from ReadyAPI or created manually with all the needed dependencies inside). When
@@ -80,7 +80,7 @@ e.g.
 ### List jobs on the server
 To get a list of jobs from the server, execute the following command:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> jobs list`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> jobs list`
 
 following the list command, it is also possible to specify optjions to select format of the output and to filter the list. The filters available are:
 
@@ -94,15 +94,15 @@ following the list command, it is also possible to specify optjions to select fo
 
 ### Cancel a running job
 Each job has a job ID, with the command "jobs cancel" a running (or queued) job can be canceled.
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> jobs cancel <job ID>`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> jobs cancel <job ID>`
 
 
 ### Clean up old jobs from the server database
 To remove old jobs from the server (to preserve disk space or limit the risk of data leakage), you can use the prune command:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> jobs prune`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> jobs prune`
 
-If no arguments are specified, test server will remove all events in the database which are older than the
+If no arguments are specified, TestEngine will remove all events in the database which are older than the
 `numberOfDaysToKeep` specification in the readyapi-testengine.yaml file. It is also possible to specify a date using the
 before argument. To remove all job history data for events older than May 1st, 2019, specify `before=2019-05-01` on the command line.
 
@@ -111,19 +111,19 @@ before argument. To remove all job history data for events older than May 1st, 2
 ### Add a user
 To add a user, call testengine-cli like this:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> user add <username> <password>`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> user add <username> <password>`
 
 This will create a new user account named what you put instead of <username> and with the password set to <password>
 
 ### Delete a user
 To delete a user, similar to the above, just call:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> user delete <username>`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> user delete <username>`
 
 ### Modify a user
 Users can also be altered if an admin wants to set their password or add/revoke admin privileges. This is done using the `user edit` command:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> user edit <username> [password=newpassword] [admin=true/false]`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> user edit <username> [password=newpassword] [admin=true/false]`
 
 both password and admin can be set at once but they can also be set one at a time. 
 
@@ -132,7 +132,7 @@ both password and admin can be set at once but they can also be set one at a tim
 It is possible to get a list of users by using the "user list" command. If there are no other arguments to the command, the tool will dump a list of 
 users and if they are administrators. The command looks like this:
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> user list [format=text/csv]`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> user list [format=text/csv]`
 
 `text` is the default, with the `csv` argument the output will instead be a csv file which can be imported into other systems.
 
@@ -140,7 +140,7 @@ users and if they are administrators. The command looks like this:
 To add multiple users (i.e. when setting up the system), the tool supports importing CSV files
 The CSV file should could have the headers "username", "password" and "admin". The "username" field is mandatory, if they are missing TestEngine will report an error.
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> user import <filename or URL>`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> user import <filename or URL>`
 
 Import will output a CSV file with the users created and their passwords (including generated password when a password 
 was missing). The output can be redirected to a file and imported into excel or some other desired format.
@@ -151,7 +151,7 @@ who terminated a job, when users are added, deleted or modified, etc. The tool l
 for a specific date range. You can also get an audit trail for a specific user (by adding a username to the command 
 line). To make it easier to process the log, it can be printed not just as text but also as csv or json. 
 
-`testengine -u <admin user name> -p <admin user password> -H http://<url to testsever> auditlog dump [format=text/csv/json] [limit=n] [user=username] [date=YYYY-MM-DD[:YYYY-MM-DD]] ]`
+`testengine -u <admin user name> -p <admin user password> -H http://<url to TestEngine> auditlog dump [format=text/csv/json] [limit=n] [user=username] [date=YYYY-MM-DD[:YYYY-MM-DD]] ]`
 
 The date can be either a date on the format YYYY-MM-DD or a range on the format YYYY-MM-DD:YYYY-MM-DD. If the date is
 omitted all data in the auditlog is returned. By specifying `limit` it is possible to limit the amount of lines to a
