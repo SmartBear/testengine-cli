@@ -99,11 +99,13 @@ function extractFilesFromJsonRepresentation(data, options) {
         }
     }
 
-    for (const [key, value] of Object.entries(target)) {
-        if (key === 'files')
-            result = result.concat(value);
-        else if (Array.isArray(value) || (value.constructor === {}.constructor)) {
-            result = result.concat(extractFilesFromJsonRepresentation(value));
+    if ( (!('disabled' in target)) || (!target['disabled'])) {
+        for (const [key, value] of Object.entries(target)) {
+            if (key === 'files')
+                result = result.concat(value);
+            else if (Array.isArray(value) || (value.constructor === {}.constructor)) {
+                result = result.concat(extractFilesFromJsonRepresentation(value));
+            }
         }
     }
     if ('cryptos' in data) {

@@ -169,6 +169,11 @@ function processTestSuite(jsonTestSuite) {
         testCases: []
     };
 
+    if ('@_disabled' in jsonTestSuite['attr'])
+        result['disabled'] = jsonTestSuite['attr']['@_disabled'];
+    else
+        result['disabled'] = false;
+
     if (Array.isArray(jsonTestSuite['con:testCase'])) {
         for (let testCase of jsonTestSuite['con:testCase']) {
             result['testCases'].push(processTestCase(testCase));
@@ -185,6 +190,10 @@ function processTestCase(jsonTestCase) {
         name: jsonTestCase['attr']['@_name'],
         testSteps: []
     };
+    if ('@_disabled' in jsonTestCase['attr'])
+        result['disabled'] = jsonTestCase['attr']['@_disabled'];
+    else
+        result['disabled'] = false;
     let testSteps = jsonTestCase['con:testStep'];
     if (testSteps !== undefined) {
         if (!Array.isArray(testSteps)) {
@@ -194,16 +203,18 @@ function processTestCase(jsonTestCase) {
             result['testSteps'].push(processTestStep(testStep));
         }
     }
-    let deepDataSources = getObjectsOfKeyInObject(jsonTestCase, 'con:dataSource');
-    for (let dataSources of deepDataSources) {
-        if (!Array.isArray(dataSources))
-            dataSources = [dataSources];
+    if (!result['disabled']) {
+        let deepDataSources = getObjectsOfKeyInObject(jsonTestCase, 'con:dataSource');
+        for (let dataSources of deepDataSources) {
+            if (!Array.isArray(dataSources))
+                dataSources = [dataSources];
 
-        for (let dataSource of dataSources) {
-            if ('file' in dataSource['con:configuration']) {
-                if (!('files' in result))
-                    result['files'] = [];
-                result['files'].push(dataSource['con:configuration']['file']);
+            for (let dataSource of dataSources) {
+                if ('file' in dataSource['con:configuration']) {
+                    if (!('files' in result))
+                        result['files'] = [];
+                    result['files'].push(dataSource['con:configuration']['file']);
+                }
             }
         }
     }
