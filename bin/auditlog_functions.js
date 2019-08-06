@@ -172,13 +172,14 @@ function humanReadableAuditlogString(data) {
             return result;
         }
 
-        case 'EXECUTION_CANCELED':
         case 'TESTJOB_CANCELED':
             return sprintf("Job %s was canceled ", data['eventData']['executionId']);
-
         case 'PASSWORD_CHANGED':
             return "Changed their password";
-
+        case 'LICENSE_INSTALLED':
+            return "License was installed";
+        case 'LICENSE_REMOVED':
+            return "License was removed";
         case 'DATABASE_PURGE':
             return sprintf("Purged job history before %s. %d jobs purged", data['eventData']['purgedBefore'], data['eventData']['purgedJobsCount']);
 
