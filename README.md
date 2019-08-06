@@ -70,6 +70,7 @@ table includes the currently implemented options.
 | tags | smoketest  | Comma separated list of tags. For a test case to be run, it should have all the listed tags. When specifying many tags, or using tags with space in the name, it is possible to surround them with either (), [] or "" but be aware that different operating systems can have special meanings for brackets which requires quoting. Tags cannot be used together with testsuite/testcase specification.|
 | tags | "smoketest,regression"  | See description above|
 | output | c:\\temp\\reports  | Directory to store reports in.|
+| format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
 | proxyHost | 172.0.1.10  | Hostname or IP of the server to use as a proxy for outgoing requests (from TestEngine)|
 | proxyPort | 8888  | Port of the proxyHost to contact for outgoing requests (from TestEngine)|
 | proxyUser | John  | Optional username to authenticate with the proxy|
@@ -104,6 +105,16 @@ Each job has a job ID, with the command "jobs cancel" a running (or queued) job 
 
 `testengine jobs cancel <job ID>`
 
+### Request an execution report from the server'
+Each job has a job ID, with the command "jobs report" you can request the execution report for a completed job.
+The "output" argument is mandatory, "format" is optional.
+
+`testengine jobs report output=/tmp/reports foramat=excel <job ID>`
+
+| Option  | Sample Value  | Description|
+|---|---|---|
+| output | c:\\temp\\reports  | Directory to store reports in.|
+| format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
 
 ### Clean up old jobs from the server database
 To remove old jobs from the server (to preserve disk space or limit the risk of data leakage), you can use the prune command:
