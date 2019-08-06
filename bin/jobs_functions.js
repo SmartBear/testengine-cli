@@ -3,49 +3,65 @@ const util = require('./shared_utils');
 const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
+const fs = require('fs');
 
-module.exports.dispatcher = function (args) {
-    if (args.length === 0)
-        return printModuleHelp();
+module.exports = {
+    dispatcher: function (args) {
+        if (args.length === 0)
+            return printModuleHelp();
 
-    switch (args[0].toLowerCase()) {
-        case 'list': {
-            let options = util.optionsFromArgs(args.splice(1), [
-                'format', 'user', 'status']);
-            listJobs(options);
-            break;
-        }
-        case 'cancel': {
-            if (args.length < 2) {
+        switch (args[0].toLowerCase()) {
+            case 'list': {
+                let options = util.optionsFromArgs(args.splice(1), [
+                    'format', 'user', 'status']);
+                listJobs(options);
+                break;
+            }
+            case 'cancel': {
+                if (args.length < 2) {
+                    printModuleHelp();
+                } else {
+                    terminateTestJob(args[1]);
+                }
+                break;
+            }
+            case 'report': {
+                if (args.length < 3) {
+                    printModuleHelp();
+                } else {
+                    let jobId = args[args.length - 1];
+                    let options = util.optionsFromArgs(args.splice(1), [
+                        'format', 'output']);
+                    reportForTestJob(jobId, options['output'], ('format' in options) ? options['format'] : 'junit');
+                }
+                break;
+            }
+            case 'prune': {
+                let argumentCount = args.length;
+                let options = util.optionsFromArgs(args.splice(1), [
+                    'before']);
+                if ((argumentCount > 1) && (!('before' in options))) {
+                    util.output('Unknown argument to testengine jobs prune.');
+                }
+                pruneJobs(options);
+                break;
+            }
+            case 'help':
                 printModuleHelp();
-            } else {
-                terminateTestJob(args[1]);
-            }
-            break;
+                break;
+            default:
+                util.error("Unknown operatation");
+                break;
         }
-        case 'prune': {
-            let argumentCount = args.length;
-            let options = util.optionsFromArgs(args.splice(1), [
-                'before']);
-            if ((argumentCount > 1) && (!('before' in options)) ) {
-                util.output('Unknown argument to testengine jobs prune.');
-            }
-            pruneJobs(options);
-            break;
-        }
-        case 'help':
-            printModuleHelp();
-            break;
-        default:
-            util.error("Unknown operatation");
-            break;
-    }
+    },
+    reportForTestJob: reportForTestJob
 };
 
 function printModuleHelp() {
     util.error("Usage: testengine jobs <command>");
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
+    util.error("   report output=<directory> [format=junit/excel/json] <testjobId>");
     util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
     util.error("   help");
@@ -65,6 +81,60 @@ function terminateTestJob(testjobId) {
                 util.output('Successfully canceled job');
             }
         })
+}
+
+function reportForTestJob(testjobId, outputFolder, format) {
+    let endPoint = config.server + '/api/v1/testjobs';
+
+    if (!fs.existsSync(outputFolder)) {
+        fs.mkdirSync(outputFolder);
+    }
+    if (fs.existsSync(outputFolder) && fs.lstatSync(outputFolder).isDirectory()) {
+        let reportFilename;
+        let contentType;
+        switch (format) {
+            case 'junit':
+                contentType = 'application/junit+xml';
+                reportFilename = 'junit-' + testjobId;
+                if (!reportFilename.endsWith(".xml")) {
+                    reportFilename += '.xml';
+                }
+                break;
+            case 'excel':
+                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                reportFilename = 'report-' + testjobId;
+                reportFilename += '.xlsx';
+                break;
+            case 'json':
+                contentType = 'application/json';
+                reportFilename = 'report-' + testjobId;
+                reportFilename += '.json';
+                break;
+            default:
+                util.error("Invalid format: " + format);
+                contentType = null;
+                break;
+        }
+        if (contentType !== null) {
+            let success = true;
+            let url = endPoint + '/' + testjobId + '/report';
+            let filename = outputFolder + '/' + reportFilename;
+            let stream = fs.createWriteStream(filename);
+            let req = request.get(url)
+                .auth(config.username, config.password)
+                .accept(contentType)
+                .on('response', function (response) {
+                    if (response.status !== 200) {
+                        success = false;
+                        console.log(response.status);
+                        fs.unlinkSync(filename)
+                    }
+                }).send();
+            req.pipe(stream);
+        }
+    } else {
+        util.error("Output folder exists but is not a directory")
+    }
 }
 
 function listJobs(options) {

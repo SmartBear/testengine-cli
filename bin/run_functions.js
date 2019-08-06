@@ -11,6 +11,7 @@ const tmp = require('tmp');
 const path = require('path');
 const JSZip = require("jszip");
 const sprintf = require('sprintf-js').sprintf;
+const jobs = require('./jobs_functions');
 const WebSocket = require('ws');
 
 module.exports.dispatcher = function (args) {
@@ -24,6 +25,7 @@ module.exports.dispatcher = function (args) {
         'tags',
         'environment',
         'output',
+        'format',
         'proxyHost',
         'proxyPort',
         'proxyUser',
@@ -49,7 +51,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -431,29 +433,7 @@ function executeProject(filename, project, options) {
                             && (status !== 'PENDING')
                             && (status !== 'DISCONNECTED'))) {
                         if ('output' in options) {
-                            if (!fs.existsSync(options['output'])) {
-                                fs.mkdirSync(options['output']);
-                            }
-                            if (fs.existsSync(options['output']) && fs.lstatSync(options['output']).isDirectory()) {
-                                let reportFilename = 'junit-' + path.basename(filename);
-                                if (!reportFilename.endsWith(".xml")) {
-                                    reportFilename += '.xml';
-                                }
-                                let url = endPoint + '/' + jobId + '/report';
-                                request.get(url)
-                                    .auth(config.username, config.password)
-                                    .accept('application/junit+xml')
-                                    .send()
-                                    .end((err, result) => {
-                                        if (err === null) {
-                                            fs.writeFileSync(options['output'] + '/' + reportFilename, result.body);
-                                        } else {
-                                            util.error(err);
-                                        }
-                                    })
-                            } else {
-                                util.error("Output folder exists but is not a directory")
-                            }
+                            jobs.reportForTestJob(jobId, options['output'], 'format' in options ? options['format'] : "junit");
                         }
                     }
                 }
