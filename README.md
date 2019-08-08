@@ -2,9 +2,8 @@
 SmartBear has a product called ReadyAPI TestEngine. It is a server which primary purpose
 is to run SoapUI projects (functional API tests for primarily REST and SOAP services), typically in a CI/CD pipeline.
 
-The product has a competent Web UI which can be used to administer the server but sometimes you do things more
-effectively using a command line tool. This is a node.js based CLI to do just that.
-The tool can handle most administration of the server as well as submitting test jobs.
+The TestEngine-CLI is command line interface for the API of the product. The tool can handle most administration of the 
+server as well as submitting test jobs and requesting reports.
 
 ## Usage
 All communication with the ReadyAPI TestEngine requires three settings.
@@ -27,7 +26,7 @@ A sample .testengine.conf fully filled in will look like this:
 {
    "username" : "administrator",
    "password" : "secretPassword",
-   "host"   : "http://172.10.1.192:8080"
+   "host"   : "https://172.10.1.192:8443"
 }
 ```
 
