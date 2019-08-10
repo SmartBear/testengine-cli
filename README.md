@@ -2,7 +2,7 @@
 SmartBear has a product called ReadyAPI TestEngine. It is a server which primary purpose
 is to run SoapUI projects (functional API tests for primarily REST and SOAP services), typically in a CI/CD pipeline.
 
-The TestEngine-CLI is command line interface for the API of the product. The tool can handle most administration of the 
+The TestEngine-CLI is a command line interface for the API of the product. The tool can handle most administration of the 
 server as well as submitting test jobs and requesting reports.
 
 ## Usage
