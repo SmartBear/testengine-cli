@@ -198,7 +198,10 @@ function pruneJobs(options) {
                         util.error(sprintf("Error: %s:%s", err.code, err.message));
                     }
                 } else {
-                    util.output(err.status + ': ' + err.message);
+                    if ('message' in res.body)
+                        util.output(res.body['message']);
+                    else
+                        util.output(err.status + ': ' + err.message);
                 }
                 return 1
             }
