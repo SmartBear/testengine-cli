@@ -3,6 +3,7 @@
 const request = require('superagent');
 const config = require('./config').config;
 const util = require('./shared_utils');
+const fs = require('fs');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0)
@@ -78,9 +79,9 @@ function uninstallLicense() {
         .accept('application/json')
         .type('application/json')
         .send()
-        .end((err, result) => {
+        .end((err) => {
             if (err === null) {
-                util.output(JSON.stringify(result.body))
+                util.output("License successfully uninstalled");
             } else {
                 if ('status' in err) {
                     switch (err['status']) {
@@ -99,18 +100,45 @@ function uninstallLicense() {
 function installFixedLicense(options, licenseFile) {
     let endPoint = config.server + '/api/v1/license';
     let activationInfo = {};
-    for (let key in ('firstName', 'lastName', 'email')) {
+    for (let key of ['firstName', 'lastName', 'email']) {
         if (key in options) {
             activationInfo[key] = options[key];
         }
     }
-    util.output(JSON.stringify(activationInfo));
-    /*
-    request.post(endPoint)
-        .auth(config.username, config.password)
-        .accept('application/json')
+    let readStream = fs.createReadStream(licenseFile);
+    readStream.on('open', function () {
+        let buffer = Buffer.from(JSON.stringify(activationInfo), 'utf8');
+        request.post(endPoint)
+            .auth(config.username, config.password)
+            .accept('application/json')
+            .type('multipart/form-data')
+            .attach('file', licenseFile)
+            .attach('activationInfo', buffer, "data.json")
+            .end((err, result) => {
+                if (err === null) {
+                    util.output("The following license was installed:");
+                    util.output(licenseInfoToString(result.body))
+                } else {
+                    if ('status' in err) {
+                        switch (err['status']) {
+                            case 403:
+                                util.error("User doesn't have enough credentials to install a license");
+                                break;
+                            case 400:
+                                util.error("Failed to install license, error: " + result.body['message']);
+                                break;
+                            default:
+                                util.error(err['status'] + ': ' + err['message']);
+                                return;
+                        }
+                    }
+                }
+            });
+    });
+    readStream.on('error', function (err) {
+        util.error(err);
+    });
 
-*/
 }
 
 function installFloatingLicense(licenseServerHost, licenseServerPort) {
@@ -126,7 +154,8 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
         .send(payload)
         .end((err, result) => {
             if (err === null) {
-                util.output(JSON.stringify(result.body))
+                util.output("The following license was installed:");
+                util.output(licenseInfoToString(result.body))
             } else {
                 if ('status' in err) {
                     switch (err['status']) {
@@ -143,4 +172,12 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
                 }
             }
         });
+}
+
+function licenseInfoToString(licenseInfo) {
+    return result = "License ID:              " + licenseInfo['licenseId'] + "\n" +
+        "Licensed to user:        " + licenseInfo['userName'] + "\n" +
+        "Organization:            " + licenseInfo['organization'] + "\n" +
+        "Expires:                 " + licenseInfo['expireDate'] + "\n" +
+        "Max Concurrent TestJobs: " + licenseInfo['maxConcurrentJobs'];
 }

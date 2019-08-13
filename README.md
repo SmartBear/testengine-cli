@@ -175,3 +175,27 @@ The date can be either a date on the format YYYY-MM-DD or a range on the format 
 omitted all data in the auditlog is returned. By specifying `limit` it is possible to limit the amount of lines to a
 set number.
 
+## License Management
+An administrator can install or uninstall licenses using the TestEngine CLI. 
+
+### Install a fixed license
+To install a fixed license, specify `type=fixed`, the user information and the path to either a .key file or a .zip
+file with licenses in it (as received from SmartBear).
+
+`testengine license install type=fixed fistName=Joe lastName=Tester email=joe.tester@example.com /home/joe/Downloads/licenses.zip`
+
+**Note:** When you install a new license, any existing old license is overwritten without deactivation. It is generally 
+a good idea to first uninstall it.
+   
+### Install a floating license
+To install a fixed license, specify `type=floating`, and the location of the floating license server (typically an IP 
+and port 1099)
+
+`testengine license install type=floating <ip-address|hostname>:1099`
+
+### Uninstall a license (floating or fixed)
+To uninstall, you use the uninstall command.
+
+`testengine license install type=floating <ip-address|hostname>:1099`
+
+A fixed license will be deactivated and a floating license will be checked back in to the floating license server. 
