@@ -7,13 +7,14 @@ const process = require('process');
 const user = require('./user_functions');
 const auditlog = require('./auditlog_functions');
 const run = require('./run_functions');
+const license = require('./license_functions');
 const jobs = require('./jobs_functions');
 const config = require('./config');
 const util = require('./shared_utils');
 
 program
     .version('0.5')
-    .usage('[options] <user|auditlog|run|jobs> command parameters')
+    .usage('[options] <user|auditlog|run|jobs|license> command parameters')
     .option('-c, --config <filename>', 'Config file for admin tool')
     .option('-q, --quiet', 'Run in quiet mode. Do not write to console')
     .option('-u, --username <username>', 'TestEngine username')
@@ -46,6 +47,9 @@ if (program.args.length > 0) {
             break;
         case 'jobs':
             jobs.dispatcher(program.args.slice(1));
+            break;
+        case 'license':
+            license.dispatcher(program.args.slice(1));
             break;
         default:
             program.outputHelp();
