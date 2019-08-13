@@ -95,6 +95,12 @@ module.exports.optionsFromArgs = function (args, validArguments = null) {
                     state = 'key';
                 break;
         }
+        if (validArguments.includes('=' + currentKey)) {
+            ret[currentKey] = true;
+            currentKey = null;
+            currentValue = null;
+            state = 'key';
+        }
         if (state === 'key' && (currentKey !== null) && (currentValue !== null)) {
             if (currentValue.toLowerCase() === 'false')
                 currentValue = false;

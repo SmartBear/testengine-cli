@@ -64,6 +64,7 @@ table includes the currently implemented options.
 
 | Option  | Sample Value  | Description|
 |---|---|---|
+| async  | N/A  | Run the project without waiting for results|
 | testsuite  | TestSuite1  | Name of a test suite to run|
 | testcase  | JRA-11224  | Name of a specific test case to run. Typically used together with **testsuite** because a project can have several test cases with the same name in different test suites.|
 | tags | smoketest  | Comma separated list of tags. For a test case to be run, it should have all the listed tags. When specifying many tags, or using tags with space in the name, it is possible to surround them with either (), [] or "" but be aware that different operating systems can have special meanings for brackets which requires quoting. Tags cannot be used together with testsuite/testcase specification.|
