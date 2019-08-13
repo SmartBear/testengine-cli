@@ -21,6 +21,8 @@ module.exports.dispatcher = function (args) {
     let argsWithoutFilename = args.splice(1, args.length - 2);
     let options = util.optionsFromArgs(argsWithoutFilename, [
         'testcase',
+        '=async',
+        '=skipdeps',
         'testsuite',
         'tags',
         'environment',
@@ -51,7 +53,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -210,7 +212,7 @@ function executeProject(filename, project, options) {
         projectFile = filename;
         isZipFile = true;
     } else {
-        if (project !== null) {
+        if (!('skipdeps' in options) && (project !== null)) {
             files = extractFilesFromJsonRepresentation(project, options);
             projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
         } else {
@@ -288,6 +290,10 @@ function executeProject(filename, project, options) {
                     callback();
                     return;
                 }
+                if ('async' in options) {
+                    callback();
+                    return;
+                }
                 request.get(config.server + '/api/v1/token')
                     .auth(config.username, config.password)
                     .accept('text/plain')
@@ -344,8 +350,8 @@ function executeProject(filename, project, options) {
                         if (err === null) {
                             status = result.body.status;
                             jobId = result.body['testjobId'];
-                            if (config.verbose)
-                                util.output("TestjoB ID: "+jobId);
+                            if (config.verbose || options.async)
+                                util.output("TestJoB ID: " + jobId);
                         } else {
                             status = 'ERROR';
                             if ('status' in err) {
@@ -372,6 +378,10 @@ function executeProject(filename, project, options) {
                     });
             },
             function (callback) {
+                if ('async' in options) {
+                    callback();
+                    return;
+                }
                 let counter = 0;
                 async.whilst(
                     function () {
@@ -386,7 +396,7 @@ function executeProject(filename, project, options) {
                     async function () {
                         if (config.showProgress) {
                             counter++;
-                            if ((counter % 5) == 0)
+                            if ((counter % 5) === 0)
                                 util.output('.', false);
                         }
                         await util.sleep(200);
@@ -422,22 +432,24 @@ function executeProject(filename, project, options) {
                     process.exit(1);
                 }
             } else {
-                // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
-                //
-                if (!missingFiles) {
-                    if (config.showProgress)
-                        util.output('');
-                    util.output("Result: " + status);
-                    if ((jobId !== null)
-                        && ((status !== 'CANCELED')
-                            && (status !== 'PENDING')
-                            && (status !== 'DISCONNECTED'))) {
-                        if ('output' in options) {
-                            jobs.reportForTestJob(jobId, options['output'], 'format' in options ? options['format'] : "junit");
+                if (!('async' in options)) {
+                    // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
+                    //
+                    if (!missingFiles) {
+                        if (config.showProgress)
+                            util.output('');
+                        util.output("Result: " + status);
+                        if ((jobId !== null)
+                            && ((status !== 'CANCELED')
+                                && (status !== 'PENDING')
+                                && (status !== 'DISCONNECTED'))) {
+                            if ('output' in options) {
+                                jobs.reportForTestJob(jobId, options['output'], 'format' in options ? options['format'] : "junit");
+                            }
                         }
                     }
+                    jobId = null;
                 }
-                jobId = null;
             }
         }
     );
