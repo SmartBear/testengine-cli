@@ -22,6 +22,7 @@ module.exports.dispatcher = function (args) {
     let options = util.optionsFromArgs(argsWithoutFilename, [
         'testcase',
         '=async',
+        '=skipdeps',
         'testsuite',
         'tags',
         'environment',
@@ -52,7 +53,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -211,7 +212,7 @@ function executeProject(filename, project, options) {
         projectFile = filename;
         isZipFile = true;
     } else {
-        if (project !== null) {
+        if (!('skipdeps' in options) && (project !== null)) {
             files = extractFilesFromJsonRepresentation(project, options);
             projectFile = (project['projectFiles'].length === 1) ? project['projectFiles'][0] : null;
         } else {
