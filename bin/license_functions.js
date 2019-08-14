@@ -186,6 +186,21 @@ function showLicenseInfo() {
             if (err === null) {
                 util.output("Current license:");
                 util.output(licenseInfoToString(result.body))
+            } else {
+                if ('status' in err) {
+                    switch (err['status']) {
+                        case 401:
+                        case 403:
+                            util.error("User doesn't have credentials to show license");
+                            break;
+                        case 404:
+                            util.error("No license installed");
+                            break;
+                        default:
+                            util.error(err['status'] + ': ' + err['message']);
+                            return;
+                    }
+                }
             }
         });
 

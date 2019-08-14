@@ -180,6 +180,10 @@ set number.
 ## License Management
 An administrator can install or uninstall licenses using the TestEngine CLI. 
 
+### Display the current license info
+To check the current license expiry and size, use the license info command.
+`testengine license info`
+
 ### Install a fixed license
 To install a fixed license, specify `type=fixed`, the user information and the path to either a .key file or a .zip
 file with licenses in it (as received from SmartBear).
