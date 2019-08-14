@@ -1,0 +1,1 @@
+// Needed to prevent crash when npm install over old version
