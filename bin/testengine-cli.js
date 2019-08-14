@@ -13,7 +13,7 @@ const config = require('./config');
 const util = require('./shared_utils');
 
 program
-    .version('0.5')
+    .version('1.0')
     .usage('[options] <user|auditlog|run|jobs|license> command parameters')
     .option('-c, --config <filename>', 'Config file for admin tool')
     .option('-q, --quiet', 'Run in quiet mode. Do not write to console')

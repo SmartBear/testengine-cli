@@ -48,7 +48,7 @@ To submit a project to be run, the basic command is as follows:
 
 `testengine run project [options] <project-file>`
 
-In the command line above, the <project filename> can be eiter a project file (.xml), a directory with a composite 
+In the command line above, the `<project file>` can be eiter a project file (.xml), a directory with a composite 
 project or a zip file (either exported from ReadyAPI or created manually with all the needed dependencies inside). When
 pointing to a project file or a folder of a composite project, the CLI will try to find all files the project is depending
 on to run the job. When `<project-file>` points to a zip file, the zip file is expected to include all the files needed,

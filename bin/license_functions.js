@@ -33,6 +33,7 @@ module.exports.dispatcher = function (args) {
             break;
         case 'info':
             // Show license info
+            showLicenseInfo();
             break;
         case 'help':
             printModuleHelp();
@@ -174,8 +175,24 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
         });
 }
 
+function showLicenseInfo() {
+    let endPoint = config.server + '/api/v1/license';
+    request.get(endPoint)
+        .auth(config.username, config.password)
+        .accept('application/json')
+        .type('application/json')
+        .send()
+        .end((err, result) => {
+            if (err === null) {
+                util.output("Current license:");
+                util.output(licenseInfoToString(result.body))
+            }
+        });
+
+}
+
 function licenseInfoToString(licenseInfo) {
-    return result = "License ID:              " + licenseInfo['licenseId'] + "\n" +
+    return "License ID:              " + licenseInfo['licenseId'] + "\n" +
         "Licensed to user:        " + licenseInfo['userName'] + "\n" +
         "Organization:            " + licenseInfo['organization'] + "\n" +
         "Expires:                 " + licenseInfo['expireDate'] + "\n" +
