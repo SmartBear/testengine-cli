@@ -3,11 +3,11 @@
   "version": "1.0.5",
   "description": "CLI for SmartBear ReadyAPI TestEngine",
   "scripts": {
-    "testengine-cli": "bin/testengine-cli.js",
+    "testengine-cli": "bin/testengine.js",
     "test": "eslint bin"
   },
   "bin": {
-    "testengine": "bin/testengine-cli.js"
+    "testengine": "bin/testengine.js"
   },
   "author": "SmartBear Software",
   "license": "Apache-2.0",
