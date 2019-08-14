@@ -69,7 +69,7 @@ function printModuleHelp() {
     util.error("Commands: ");
     util.error("   add <username> <password>");
     util.error("   edit <username> [password=newpassword] [admin=true/false]");
-    util.error("   delete <username> <password>");
+    util.error("   delete <username>");
     util.error("   import <file/url>");
     util.error("   list [format=text/csv]");
     util.error("   help");
