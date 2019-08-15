@@ -14,6 +14,7 @@ const util = require('./shared_utils');
 
 program
     .version('1.0')
+    .name("testengine")
     .usage('[options] <user|auditlog|run|jobs|license> command parameters')
     .option('-c, --config <filename>', 'Config file for admin tool')
     .option('-q, --quiet', 'Run in quiet mode. Do not write to console')
