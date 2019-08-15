@@ -13,7 +13,7 @@ module.exports = {
         switch (args[0].toLowerCase()) {
             case 'list': {
                 let options = util.optionsFromArgs(args.splice(1), [
-                    'format', 'user', 'status']);
+                    'format', 'user', 'status', 'limit']);
                 listJobs(options);
                 break;
             }
@@ -139,7 +139,8 @@ function reportForTestJob(testjobId, outputFolder, format) {
 
 function listJobs(options) {
     let format = (options && 'format' in options) ? options['format'] : 'text';
-    request.get(config.server + '/api/v1/testjobs')
+    let limit = (options && 'limit' in options) ? options['limit'] : 100;
+    request.get(config.server + '/api/v1/testjobs?fetch=' + limit)
         .auth(config.username, config.password)
         .accept('application/json')
         .send()

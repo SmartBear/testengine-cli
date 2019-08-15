@@ -98,6 +98,7 @@ following the list command, it is also possible to specify optjions to select fo
 | format| csv  | Get the list as CSV data which can be imported in a spreadsheet. Other formats are text and json|
 | user  | joe  | Get all jobs submitted by joe|
 | user  | "joe, adam"  | Get all jobs submitted by joe or adam|
+| limit | 1000  | Limit the number of jobs returned, the default value is 100|
 | status| FAILED | Get all jobs with a status "FAILED"|
 | status| "FAILED,CANCELED"  | Get all jobs which was either canceled or failed|
 
