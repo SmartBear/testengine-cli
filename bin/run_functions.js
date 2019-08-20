@@ -355,7 +355,7 @@ function executeProject(filename, project, options) {
                         } else {
                             status = 'ERROR';
                             if ('status' in err) {
-                                switch(err['status']) {
+                                switch (err['status']) {
                                     case 412:
                                         if (Array.isArray(result.body)) {
                                             util.error("Project cannot be accepted, files missing:");
@@ -365,13 +365,19 @@ function executeProject(filename, project, options) {
                                         }
                                         break;
                                     case 400:
-                                        util.error('Error: ' +result.body['message']);
+                                        util.error('Error: ' + result.body['message']);
                                         break;
                                     default:
-                                        util.error(err['status']+': '+err['message']);
+                                        if ('message' in result.body) {
+                                            util.error(err['status'] + ': ' + result.body['message']);
+                                        } else {
+                                            util.error(err['status'] + ': ' + err['message']);
+                                        }
                                         callback(err);
                                         return;
                                 }
+                            } else {
+                                util.error(err);
                             }
                         }
                         callback();
@@ -411,7 +417,8 @@ function executeProject(filename, project, options) {
                         }
                         callback();
                     }
-                );
+
+            )
             }
         ],
         function (res) {

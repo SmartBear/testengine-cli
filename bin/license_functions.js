@@ -80,7 +80,7 @@ function uninstallLicense() {
         .accept('application/json')
         .type('application/json')
         .send()
-        .end((err) => {
+        .end((err, result) => {
             if (err === null) {
                 util.output("License successfully uninstalled");
             } else {
@@ -90,7 +90,7 @@ function uninstallLicense() {
                             util.error("User doesn't have enough credentials to uninstall a license");
                             break;
                         default:
-                            util.error(err['status'] + ': ' + err['message']);
+                            util.error(err['status'] + ': ' + result.body['message']);
                             return;
                     }
                 }
@@ -129,9 +129,15 @@ function installFixedLicense(options, licenseFile) {
                                 util.error("Failed to install license, error: " + result.body['message']);
                                 break;
                             default:
-                                util.error(err['status'] + ': ' + err['message']);
+                                if ('message' in result.body) {
+                                    util.error(err['status'] + ': ' + result.body['message']);
+                                } else {
+                                    util.error(err['status'] + ': ' + err['message']);
+                                }
                                 return;
                         }
+                    } else {
+                        util.error(err);
                     }
                 }
             });
@@ -170,6 +176,8 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
                             util.error(err['status'] + ': ' + err['message']);
                             return;
                     }
+                } else {
+                    util.error(err);
                 }
             }
         });
