@@ -200,6 +200,8 @@ function showLicenseInfo() {
                             util.error(err['status'] + ': ' + err['message']);
                             return;
                     }
+                } else {
+                    util.error(err);
                 }
             }
         });
