@@ -11,7 +11,8 @@ let config = {
     username: null,
     password: null,
     server: null,
-    showProgress: false
+    showProgress: false,
+    showHelp: false
 };
 
 function readConfigFromFile(filename) {
@@ -53,7 +54,11 @@ function initConfig() {
     if (program.progress) {
         config.showProgress = true;
     }
-    
+
+    if (program.help) {
+        config.showHelp = true;
+    }
+
     if (program.username) {
         config.username = program.username
     }
@@ -69,6 +74,17 @@ function initConfig() {
             config.server = program.host.substr(0, program.host.length - 1);
         else
             config.server = program.host
+    }
+
+    if (!config.host) {
+        process.stdout.write("Warning: No valid host specified (-H)\n");
+    }
+    if (!config.username) {
+        process.stdout.write("Warning: No user name specified (-u) \n");
+    }
+
+    if (!config.password) {
+        process.stdout.write("Warning: No password specified (-p)\n");
     }
 }
 
