@@ -22,7 +22,6 @@
     "fast-xml-parser": "^3.12.19",
     "fs": "0.0.1-security",
     "jszip": "^3.2.2",
-    "nvm": "0.0.4",
     "sprintf-js": "^1.1.2",
     "superagent": "^5.1.0",
     "tmp": "^0.1.0",
