@@ -76,7 +76,7 @@ function initConfig() {
             config.server = program.host
     }
 
-    if (!config.host) {
+    if (!config.server) {
         process.stdout.write("Warning: No valid host specified (-H)\n");
     }
     if (!config.username) {

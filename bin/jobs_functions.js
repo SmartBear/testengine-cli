@@ -25,6 +25,14 @@ module.exports = {
                 }
                 break;
             }
+            case 'status': {
+                if (args.length < 2) {
+                    printModuleHelp();
+                } else {
+                    reportForTestJob(args[1]);
+                }
+                break;
+            }
             case 'report': {
                 if (args.length < 3) {
                     printModuleHelp();
@@ -62,6 +70,7 @@ function printModuleHelp() {
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
     util.error("   report output=<directory> [format=junit/excel/json] <testjobId>");
+    util.error("   status <testjobId>");
     util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
     util.error("   help");
@@ -85,55 +94,70 @@ function terminateTestJob(testjobId) {
 
 function reportForTestJob(testjobId, outputFolder, format) {
     let endPoint = config.server + '/api/v1/testjobs';
+    let reportFilename;
+    let contentType = 'application/json';
 
-    if (!fs.existsSync(outputFolder)) {
-        fs.mkdirSync(outputFolder);
-    }
-    if (fs.existsSync(outputFolder) && fs.lstatSync(outputFolder).isDirectory()) {
-        let reportFilename;
-        let contentType;
-        switch (format) {
-            case 'junit':
-                contentType = 'application/junit+xml';
-                reportFilename = 'junit-' + testjobId;
-                if (!reportFilename.endsWith(".xml")) {
-                    reportFilename += '.xml';
-                }
-                break;
-            case 'excel':
-                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                reportFilename = 'report-' + testjobId;
-                reportFilename += '.xlsx';
-                break;
-            case 'json':
-                contentType = 'application/json';
-                reportFilename = 'report-' + testjobId;
-                reportFilename += '.json';
-                break;
-            default:
-                util.error("Invalid format: " + format);
-                contentType = null;
-                break;
+    if (outputFolder) {
+        if (!fs.existsSync(outputFolder)) {
+            fs.mkdirSync(outputFolder);
         }
-        if (contentType !== null) {
-            let success = true;
-            let url = endPoint + '/' + testjobId + '/report';
-            let filename = outputFolder + '/' + reportFilename;
-            let stream = fs.createWriteStream(filename);
-            let req = request.get(url)
-                .auth(config.username, config.password)
-                .accept(contentType)
-                .on('response', function (response) {
-                    if (response.status !== 200) {
-                        success = false;
-                        console.log(response.status);
+        if (fs.existsSync(outputFolder) && fs.lstatSync(outputFolder).isDirectory()) {
+            switch (format) {
+                case 'junit':
+                    contentType = 'application/junit+xml';
+                    reportFilename = 'junit-' + testjobId;
+                    if (!reportFilename.endsWith(".xml")) {
+                        reportFilename += '.xml';
+                    }
+                    break;
+                case 'excel':
+                    contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    reportFilename = 'report-' + testjobId;
+                    reportFilename += '.xlsx';
+                    break;
+                case 'json':
+                    contentType = 'application/json';
+                    reportFilename = 'report-' + testjobId;
+                    reportFilename += '.json';
+                    break;
+                default:
+                    util.error("Invalid format: " + format);
+                    contentType = '';
+                    break;
+            }
+        } else {
+            util.error("Output folder exists but is not a directory");
+            return;
+        }
+    }
+    if (contentType !== '') {
+        let success = true;
+        let url = endPoint + '/' + testjobId + '/report';
+        let stream;
+        let filename;
+        if (outputFolder) {
+            filename = outputFolder + '/' + reportFilename;
+            stream = fs.createWriteStream(filename);
+        }
+        let req = request.get(url)
+            .auth(config.username, config.password)
+            .accept(contentType)
+            .on('response', function (response) {
+                if (response.status !== 200) {
+                    success = false;
+                    console.log(response.status);
+                    if (filename) {
                         fs.unlinkSync(filename)
                     }
-                }).send();
+                }
+            }).send();
+        if (stream) {
             req.pipe(stream);
+        } else {
+            req.end((err, result) => {
+                util.output('Status of job ' + testjobId + ': ' + result.body.status);
+            })
         }
-    } else {
-        util.error("Output folder exists but is not a directory")
     }
 }
 
