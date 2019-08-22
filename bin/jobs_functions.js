@@ -83,9 +83,20 @@ function terminateTestJob(testjobId) {
         .auth(config.username, config.password)
         .accept('application/junit+xml')
         .send()
-        .end((err, ) => {
+        .end((err, result) => {
             if (err !== null) {
-                util.error(err);
+                if (('status' in err) && ('message' in result.body)) {
+                    switch (err['status']) {
+                        case 403:
+                            util.error(err['status'] + ': ' + result.body['message']);
+                            break;
+                        default:
+                            util.error(err['status'] + ': ' + result.body['message']);
+                            return;
+                    }
+                } else {
+                    util.error(err);
+                }
             } else {
                 util.output('Successfully canceled job');
             }
@@ -145,7 +156,6 @@ function reportForTestJob(testjobId, outputFolder, format) {
             .on('response', function (response) {
                 if (response.status !== 200) {
                     success = false;
-                    console.log(response.status);
                     if (filename) {
                         fs.unlinkSync(filename)
                     }
@@ -155,7 +165,22 @@ function reportForTestJob(testjobId, outputFolder, format) {
             req.pipe(stream);
         } else {
             req.end((err, result) => {
-                util.output('Status of job ' + testjobId + ': ' + result.body.status);
+                if (err === null) {
+                    util.output('Status of job ' + testjobId + ': ' + result.body.status);
+                } else {
+                    if (('status' in err) && ('message' in result.body)) {
+                        switch (err['status']) {
+                            case 403:
+                                util.error(err['status'] + ': ' + result.body['message']);
+                                break;
+                            default:
+                                util.error(err['status'] + ': ' + result.body['message']);
+                                return;
+                        }
+                    } else {
+                        util.error(err);
+                    }
+                }
             })
         }
     }
