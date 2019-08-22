@@ -91,7 +91,7 @@ To get a list of jobs from the server, execute the following command:
 
 `testengine jobs list`
 
-following the list command, it is also possible to specify optjions to select format of the output and to filter the list. The filters available are:
+following the list command, it is also possible to specify options to select format of the output and to filter the list. The filters available are:
 
 | Option  | Sample Value  | Description|
 |---|---|---|
