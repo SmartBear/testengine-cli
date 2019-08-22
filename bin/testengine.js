@@ -23,7 +23,6 @@ program
     .option('-H, --host <hostname>', 'TestEngine host/url')
     .option('-v, --verbose', 'Enable Verbose output')
     .option('-P, --progress', 'Indicate progress')
-    .option('-h, --help', 'Show this help text')
     .parse(process.argv);
 
 if (program.args.length === 0) {
@@ -33,7 +32,7 @@ if (program.args.length === 0) {
 
 config.init();
 
-if (config.showHelp) {
+if (config.config.showHelp) {
     program.outputHelp();
     return
 }

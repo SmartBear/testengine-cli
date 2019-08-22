@@ -54,8 +54,7 @@ function initConfig() {
     if (program.progress) {
         config.showProgress = true;
     }
-
-    if (program.help) {
+    if (process.argv.indexOf('-h') >= 0) {
         config.showHelp = true;
     }
 
