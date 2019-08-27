@@ -15,7 +15,7 @@ module.exports.dispatcher = function (args) {
                 printModuleHelp();
             } else {
                 let options = util.optionsFromArgs(args.splice(1), [
-                    'format', 'date', 'user', 'limit']);
+                    'format', 'date', 'user', 'limit', '=iso']);
                 dumpAuditLog(options)
             }
 
@@ -32,7 +32,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine auditlog <command>");
     util.error("Commands: ");
-    util.error("   dump [format=text/csv/json>] [limit=n] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
+    util.error("   dump [format=text/csv/json>] [limit=n] [iso] [date=[YYYY-MM-DD[:YYYY-MM-DD]] ] [user=username]");
     util.error("   help");
 }
 
@@ -83,8 +83,9 @@ function dumpAuditLog(options) {
                 printAuditLogHeader(format);
                 let counter = 0;
                 let maxItems = 'limit' in options?options['limit']:1e10;
+                let isoTime = 'iso' in options;
                 for (let line of result.body) {
-                    printAuditLogLine(line, format);
+                    printAuditLogLine(line, format, isoTime);
                     counter++;
                     if (counter >= maxItems)
                         break;
@@ -117,16 +118,18 @@ function printAuditLogHeader(format) {
     }
 }
 
-function printAuditLogLine(line, format) {
+function printAuditLogLine(line, format, isoTime) {
     switch (format) {
-        case 'text':
+        case 'text': {
+            let time = new Date(line['eventTime']);
             util.output(sprintf("%-25s %-20s %-20s %s",
-                new Date(line['eventTime']).toLocaleString(),
+                isoTime ? time.toISOString() : time.toLocaleString(),
                 ('userName' in line && line['userName']) ? line['userName'] : '',
                 line['eventType'],
                 humanReadableAuditlogString(line))
-            );
+                );
             break;
+        }
         case 'csv': {
             let date = new Date(line['eventTime']);
             util.output(sprintf('"%s",%d,"%s","%s","%s","%s"',
