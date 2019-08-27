@@ -11,9 +11,11 @@ const license = require('./license_functions');
 const jobs = require('./jobs_functions');
 const config = require('./config');
 const util = require('./shared_utils');
+const pjson = require('../package.json');
+
 
 program
-    .version('1.0')
+    .version(pjson.version)
     .name("testengine")
     .usage('[options] <user|auditlog|run|jobs|license> command parameters')
     .option('-c, --config <filename>', 'Config file for admin tool')
