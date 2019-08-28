@@ -71,7 +71,6 @@ module.exports.parseComposite = function (pathname) {
     result = postProcessStructure(jsonProject);
     result['name'] = jsonProject['con:soapui-project']['attr']['@_name'];
     result['projectFiles'] = jsonProject['projectFiles'];
-
     return result
 };
 

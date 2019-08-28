@@ -220,7 +220,6 @@ function executeProject(filename, project, options) {
             projectFile = filename;
         }
     }
-
     process.on("exit", function () {
         //graceful shutdown
         if (jobId) {
@@ -235,6 +234,7 @@ function executeProject(filename, project, options) {
             function (callback) {
                 if (!isZipFile && (project !== null) && ((files.length > 0) || (project['projectFiles'].length > 1))) {
                     // We depend on files, we need to create and send a zip file
+                    let projectRootPath = '';
                     contentType = 'application/zip';
                     let zipFile = new JSZip();
                     // First add the project
@@ -244,12 +244,15 @@ function executeProject(filename, project, options) {
                         let projectFilesByLength = project['projectFiles'].sort((a, b) => {
                             return a.length - b.length
                         });
-                        let projectRootPath = path.dirname(projectFilesByLength[0]);
+                        util.output(path.resolve(projectFilesByLength[0]));
+                        let fullPathUpToComposite = path.dirname(path.resolve(projectFilesByLength[0]));
+                        projectRootPath = path.dirname(path.resolve(projectFilesByLength[0]));
+                        projectRootPath = path.basename(fullPathUpToComposite);
+                        fullPathUpToComposite = path.dirname(fullPathUpToComposite);
+
                         for (let compositeProjectFile of project['projectFiles']) {
-                            let inZipPath = compositeProjectFile;
-                            if (inZipPath[0] === '/') {
-                                inZipPath = inZipPath.substr(projectRootPath.length + 1);
-                            }
+                            let inZipPath = path.resolve(compositeProjectFile);
+                            inZipPath = inZipPath.substr(fullPathUpToComposite.length);
                             let buffer = fs.readFileSync(compositeProjectFile, null);
                             zipFile.file(inZipPath, buffer);
                         }
@@ -261,7 +264,8 @@ function executeProject(filename, project, options) {
                             continue;
                         }
                         let buffer = fs.readFileSync(file, null);
-                        zipFile.file(path.basename(file), buffer);
+                        let inZipPath = (projectRootPath.length > 0 ? projectRootPath + '/' : '') + path.basename(file);
+                        zipFile.file(inZipPath, buffer);
                     }
                     let tmpName = tmp.fileSync();
                     zipFile.generateNodeStream({type: 'nodebuffer', streamFiles: true, compression: 'DEFLATE'})
@@ -368,11 +372,6 @@ function executeProject(filename, project, options) {
                                         util.error('Error: ' + result.body['message']);
                                         break;
                                     default:
-                                        if ('message' in result.body) {
-                                            util.error(err['status'] + ': ' + result.body['message']);
-                                        } else {
-                                            util.error(err['status'] + ': ' + err['message']);
-                                        }
                                         callback(err);
                                         return;
                                 }
