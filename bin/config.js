@@ -68,7 +68,7 @@ function initConfig() {
 
     if (program.host) {
         if (program.host.substr(0, 4).toLowerCase() !== 'http')
-            process.stdout.write("Warning: Host should be a URL starting with http;// or https://\n");
+            process.stdout.write("Warning: Host should be a URL starting with http:// or https://\n");
         if (/.*[/]$/.test(program.host))
             config.server = program.host.substr(0, program.host.length - 1);
         else
