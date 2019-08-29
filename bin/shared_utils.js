@@ -107,7 +107,7 @@ module.exports.optionsFromArgs = function (args, validArguments = null) {
             else if (currentValue.toLowerCase() === 'true')
                 currentValue = true;
             if ((validArguments !== null) && !validArguments.includes(currentKey)) {
-                module.exports.error("Unkown parameter: " + currentKey);
+                module.exports.error("Unknown parameter: " + currentKey);
             } else {
                 ret[currentKey] = currentValue;
             }
