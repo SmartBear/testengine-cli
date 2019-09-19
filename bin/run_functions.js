@@ -259,9 +259,12 @@ function executeProject(filename, project, options) {
                     }
                     for (let file of files) {
                         if (!fs.existsSync(file)) {
-                            util.error("Referenced file missing: " + file);
-                            missingFiles = true;
-                            continue;
+                            file = path.resolve(project['resourceRoot'], file);
+                            if (!fs.existsSync(file)) {
+                                util.error("Referenced file missing: " + file);
+                                missingFiles = true;
+                                continue;
+                            }
                         }
                         let buffer = fs.readFileSync(file, null);
                         let inZipPath = (projectRootPath.length > 0 ? projectRootPath + '/' : '') + path.basename(file);

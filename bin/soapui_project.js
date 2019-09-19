@@ -35,6 +35,10 @@ module.exports.parse = function (filename) {
         result = postProcessStructure(jsonProject);
 
         result['name'] = jsonProject['con:soapui-project']['attr']['@_name'];
+        let resourceRoot = path.dirname(filename);
+        if ( ('@_resourceRoot' in jsonProject['con:soapui-project']['attr']) && (jsonProject['con:soapui-project']['attr']['@_resourceRoot'].length > 0))
+            resourceRoot = jsonProject['con:soapui-project']['attr']['@_resourceRoot'];
+        result['resourceRoot'] = resourceRoot;
         result['projectFiles'] = [filename];
     } else {
         util.error("File doesn't seem to be a SoapUI project");

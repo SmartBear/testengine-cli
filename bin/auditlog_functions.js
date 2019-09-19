@@ -186,7 +186,11 @@ function humanReadableAuditlogString(data) {
         case 'LICENSE_REVOKED':
             return sprintf("Floating license was revoked, reason: %s", data['eventData']['reason']);
         case 'DATABASE_PURGE':
-            return sprintf("Purged job history before %s. %d jobs purged", data['eventData']['purgedBefore'], data['eventData']['purgedJobsCount']);
+            if ('maxJobsToKeep' in data['eventData']) {
+              return sprintf("Purged job history. %d jobs purged to keep a maximum of %d test jobs", data['eventData']['purgedJobsCount'], data['eventData']['maxJobsToKeep']);
+            } else {
+              return sprintf("Purged job history before %s. %d jobs purged", data['eventData']['purgedBefore'], data['eventData']['purgedJobsCount']);
+            }
 
         default:
             return data['eventType'] + ' with params: ' + JSON.stringify(data);
