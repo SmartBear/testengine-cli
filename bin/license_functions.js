@@ -4,6 +4,7 @@ const request = require('superagent');
 const config = require('./config').config;
 const util = require('./shared_utils');
 const fs = require('fs');
+const path = require('path');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0)
@@ -143,7 +144,10 @@ function installFixedLicense(options, licenseFile) {
             });
     });
     readStream.on('error', function (err) {
-        util.error(err);
+        util.error("Error: " + err.message);
+        let ext = path.extname(licenseFile).toLowerCase();
+        if ((ext !== '.key') && (ext !== '.zip'))
+            util.error('"' + licenseFile + '" does not seem to be a .zip or .key file');
     });
 
 }
