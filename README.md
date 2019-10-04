@@ -65,12 +65,14 @@ table includes the currently implemented options.
 | Option  | Sample Value  | Description|
 |---|---|---|
 | async  | N/A  | Run the project without waiting for results. The TestJobID will be printed on the console to make it possible to query status, get reports or cancel the job|
+| timeout| 30 | Specify a timeout for the running job. When the job has been running for the specified number of seconds, the job will fail and the report will include information that it timed out. If not specified, the job will always run until completed|
 | skipdeps | N/A | Do not scan project for dependencies. This will improve performance for large projects without dependences to external files |
 | testsuite  | TestSuite1  | Name of a test suite to run|
 | testcase  | JRA-11224  | Name of a specific test case to run. Typically used together with **testsuite** because a project can have several test cases with the same name in different test suites.|
 | tags | smoketest  | Comma separated list of tags. For a test case to be run, it should have all the listed tags. When specifying many tags, or using tags with space in the name, it is possible to surround them with either (), [] or "" but be aware that different operating systems can have special meanings for brackets which requires quoting. Tags cannot be used together with testsuite/testcase specification.|
 | tags | "smoketest,regression"  | See description above|
 | output | c:\\temp\\reports  | Directory to store reports in.|
+| reportFileName | File name for the report. If omitted, the report will get a name based on the test job ID|
 | format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
 | proxyHost | 172.0.1.10  | Hostname or IP of the server to use as a proxy for outgoing requests (from TestEngine)|
 | proxyPort | 8888  | Port of the proxyHost to contact for outgoing requests (from TestEngine)|
@@ -121,6 +123,7 @@ The "output" argument is mandatory, "format" is optional.
 | Option  | Sample Value  | Description|
 |---|---|---|
 | output | c:\\temp\\reports  | Directory to store reports in.|
+| reportFileName | File name for the report. If omitted, the report will get a name based on the test job ID|
 | format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
 
 ### Clean up old jobs from the server database

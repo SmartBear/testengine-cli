@@ -39,8 +39,8 @@ module.exports = {
                 } else {
                     let jobId = args[args.length - 1];
                     let options = util.optionsFromArgs(args.splice(1), [
-                        'format', 'output']);
-                    reportForTestJob(jobId, options['output'], ('format' in options) ? options['format'] : 'junit');
+                        'format', 'output', 'reportFileName']);
+                    reportForTestJob(jobId, options['output'], options['reportFileName'], ('format' in options) ? options['format'] : 'junit');
                 }
                 break;
             }
@@ -69,7 +69,7 @@ function printModuleHelp() {
     util.error("Usage: testengine jobs <command>");
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
-    util.error("   report output=<directory> [format=junit/excel/json] <testjobId>");
+    util.error("   report output=<directory> [reportFileName=<filename>] [format=junit/excel/json] <testjobId>");
     util.error("   status <testjobId>");
     util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
@@ -103,7 +103,7 @@ function terminateTestJob(testjobId) {
         })
 }
 
-function reportForTestJob(testjobId, outputFolder, format) {
+function reportForTestJob(testjobId, outputFolder, fileName, format) {
     let endPoint = config.server + '/api/v1/testjobs';
     let reportFilename;
     let contentType = 'application/json';
@@ -116,19 +116,19 @@ function reportForTestJob(testjobId, outputFolder, format) {
             switch (format) {
                 case 'junit':
                     contentType = 'application/junit+xml';
-                    reportFilename = 'junit-' + testjobId;
+                    reportFilename = fileName ? fileName : ('junit-' + testjobId);
                     if (!reportFilename.endsWith(".xml")) {
                         reportFilename += '.xml';
                     }
                     break;
                 case 'excel':
                     contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    reportFilename = 'report-' + testjobId;
+                    reportFilename = fileName ? fileName : ('report-' + testjobId);
                     reportFilename += '.xlsx';
                     break;
                 case 'json':
                     contentType = 'application/json';
-                    reportFilename = 'report-' + testjobId;
+                    reportFilename = fileName ? fileName : ('report-' + testjobId);
                     reportFilename += '.json';
                     break;
                 default:
@@ -145,10 +145,10 @@ function reportForTestJob(testjobId, outputFolder, format) {
         let success = true;
         let url = endPoint + '/' + testjobId + '/report';
         let stream;
-        let filename;
+        let reportFileName;
         if (outputFolder) {
-            filename = outputFolder + '/' + reportFilename;
-            stream = fs.createWriteStream(filename);
+            reportFileName = outputFolder + '/' + reportFilename;
+            stream = fs.createWriteStream(reportFileName);
         }
         let req = request.get(url)
             .auth(config.username, config.password)
@@ -156,8 +156,8 @@ function reportForTestJob(testjobId, outputFolder, format) {
             .on('response', function (response) {
                 if (response.status !== 200) {
                     success = false;
-                    if (filename) {
-                        fs.unlinkSync(filename)
+                    if (reportFileName) {
+                        fs.unlinkSync(reportFileName)
                     }
                 }
             }).send();

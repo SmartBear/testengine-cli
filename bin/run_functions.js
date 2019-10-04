@@ -27,7 +27,9 @@ module.exports.dispatcher = function (args) {
         'tags',
         'environment',
         'output',
+        'reportFileName',
         'format',
+        'timeout',
         'proxyHost',
         'proxyPort',
         'proxyUser',
@@ -53,7 +55,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [tags=(tag1,tag2)] [output=<directory>] [format=junit/excel/json] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -180,6 +182,9 @@ function getQueryStringFromOptions(options) {
                 queryString += 'environment=' + encodeURI(options[key]);
                 break;
             case 'proxyUser':
+                queryString += 'proxyUsername=' + encodeURI(options[key]);
+                break;
+            case 'timeout':
                 queryString += 'proxyUsername=' + encodeURI(options[key]);
                 break;
             case 'proxyPassword':
@@ -453,7 +458,7 @@ function executeProject(filename, project, options) {
                                 && (status !== 'PENDING')
                                 && (status !== 'DISCONNECTED'))) {
                             if ('output' in options) {
-                                jobs.reportForTestJob(jobId, options['output'], 'format' in options ? options['format'] : "junit");
+                                jobs.reportForTestJob(jobId, options['output'], options['reportFileName'], 'format' in options ? options['format'] : "junit");
                             }
                         }
                     }
