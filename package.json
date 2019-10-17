@@ -1,6 +1,6 @@
 {
   "name": "testengine-cli",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "CLI for SmartBear ReadyAPI TestEngine",
   "scripts": {
     "testengine": "bin/testengine.js",

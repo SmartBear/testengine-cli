@@ -185,7 +185,7 @@ function getQueryStringFromOptions(options) {
                 queryString += 'proxyUsername=' + encodeURI(options[key]);
                 break;
             case 'timeout':
-                queryString += 'proxyUsername=' + encodeURI(options[key]);
+                queryString += 'timeout=' + encodeURI(options[key]);
                 break;
             case 'proxyPassword':
             case 'proxyHost':
