@@ -156,15 +156,13 @@ function runProject(filename, options) {
 function getQueryStringFromOptions(options) {
     let queryString = '';
     for (let key of Object.keys(options)) {
-        if (queryString.length > 0) {
-            queryString += '&';
-        }
+        let queryStringPart = '';
         switch (key) {
             case 'testsuite':
-                queryString += 'testSuiteName=' + encodeURI(options[key]);
+                queryStringPart = 'testSuiteName=' + encodeURI(options[key]);
                 break;
             case 'testcase':
-                queryString += 'testCaseName=' + encodeURI(options[key]);
+                queryStringPart = 'testCaseName=' + encodeURI(options[key]);
                 break;
             case 'tags': {
                 let tags = options[key];
@@ -172,28 +170,28 @@ function getQueryStringFromOptions(options) {
                 if (mr) {
                     tags = mr[1];
                 }
-                queryString += 'tags=' + encodeURI(tags);
+                queryStringPart = 'tags=' + encodeURI(tags);
                 break;
             }
-            case 'projectPassword':
-                queryString += 'projectPassword=' + encodeURI(options[key]);
+            case 'proxyUser':
+                queryStringPart = 'proxyUsername=' + encodeURI(options[key]);
                 break;
             case 'environment':
-                queryString += 'environment=' + encodeURI(options[key]);
-                break;
-            case 'proxyUser':
-                queryString += 'proxyUsername=' + encodeURI(options[key]);
-                break;
+            case 'projectPassword':
             case 'timeout':
-                queryString += 'timeout=' + encodeURI(options[key]);
-                break;
             case 'proxyPassword':
             case 'proxyHost':
             case 'proxyPort':
-                queryString += key + '=' + encodeURI(options[key]);
+                queryStringPart = key + '=' + encodeURI(options[key]);
                 break;
             default:
                 break;
+        }
+        if (queryStringPart.length > 0) {
+            if (queryString.length > 0) {
+                queryString += '&';
+            }
+            queryString += queryStringPart;
         }
     }
     return queryString;
