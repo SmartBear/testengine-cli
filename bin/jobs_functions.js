@@ -69,7 +69,7 @@ function printModuleHelp() {
     util.error("Usage: testengine jobs <command>");
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
-    util.error("   report output=<directory> [reportFileName=<filename>] [format=junit/excel/json] <testjobId>");
+    util.error("   report output=<directory> [reportFileName=<filename>] [format=junit/excel/json/pdf] <testjobId>");
     util.error("   status <testjobId>");
     util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
@@ -130,6 +130,11 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     contentType = 'application/json';
                     reportFilename = fileName ? fileName : ('report-' + testjobId);
                     reportFilename += '.json';
+                    break;
+                case 'pdf':
+                    contentType = 'application/pdf';
+                    reportFilename = fileName ? fileName : ('report-' + testjobId);
+                    reportFilename += '.pdf';
                     break;
                 default:
                     util.error("Invalid format: " + format);
