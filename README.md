@@ -73,7 +73,7 @@ table includes the currently implemented options.
 | tags | "smoketest,regression"  | See description above|
 | output | c:\\temp\\reports  | Directory to store reports in.|
 | reportFileName | File name for the report. If omitted, the report will get a name based on the test job ID|
-| format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
+| format | excel | Specify the file type of the report. Currently supported formats are json, junit, excel and pdf. The default format is junit|
 | proxyHost | 172.0.1.10  | Hostname or IP of the server to use as a proxy for outgoing requests (from TestEngine)|
 | proxyPort | 8888  | Port of the proxyHost to contact for outgoing requests (from TestEngine)|
 | proxyUser | John  | Optional username to authenticate with the proxy|
@@ -118,13 +118,13 @@ Each job has a job ID, with the command "jobs cancel" a running (or queued) job 
 Each job has a job ID, with the command "jobs report" you can request the execution report for a completed job.
 The "output" argument is mandatory, "format" is optional.
 
-`testengine jobs report output=/tmp/reports foramat=excel <job ID>`
+`testengine jobs report output=/tmp/reports format=excel <job ID>`
 
 | Option  | Sample Value  | Description|
 |---|---|---|
 | output | c:\\temp\\reports  | Directory to store reports in.|
 | reportFileName | File name for the report. If omitted, the report will get a name based on the test job ID|
-| format | excel | Specify the file type of the report. Currently supported formats are json, junit and excel. The default format is junit|
+| format | excel | Specify the file type of the report. Currently supported formats are json, junit, excel and pdf. The default format is junit|
 
 ### Clean up old jobs from the server database
 To remove old jobs from the server (to preserve disk space or limit the risk of data leakage), you can use the prune command:
