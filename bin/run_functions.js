@@ -24,6 +24,7 @@ module.exports.dispatcher = function (args) {
         '=async',
         '=skipdeps',
         'testsuite',
+        'securitytest',
         'tags',
         'environment',
         'output',
@@ -47,7 +48,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.error("Unknown operatation");
+            util.error("Unknown operation");
             break;
     }
 };
@@ -55,16 +56,20 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
 }
 
 function conflictingOptionsCheck(options) {
+    if (('securitytest' in options) && (('testcase' in options) || ('testsuite' in options))) {
+        util.error('Error: You can specify only functional test (testsuite and/or testscase) or security test (securitytest) in one go');
+        return false;
+    }
     if ('tags' in options) {
         if (('testsuite' in options) || ('testcase' in options)) {
-            util.error('Error: tags are cannot be used together with testcase/testsuite ');
+            util.error('Error: tags cannot be used together with testcase/testsuite ');
             return false;
         }
     }
@@ -163,6 +168,9 @@ function getQueryStringFromOptions(options) {
                 break;
             case 'testcase':
                 queryStringPart = 'testCaseName=' + encodeURI(options[key]);
+                break;
+            case 'securitytest':
+                queryStringPart = 'securityTestName=' + encodeURI(options[key]);
                 break;
             case 'tags': {
                 let tags = options[key];
