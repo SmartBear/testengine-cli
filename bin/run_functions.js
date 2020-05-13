@@ -64,7 +64,7 @@ function printModuleHelp() {
 
 function conflictingOptionsCheck(options) {
     if (('securitytest' in options) && (('testcase' in options) || ('testsuite' in options))) {
-        util.error('Error: You can specify only functional test (testsuite and/or testscase) or security test (securitytest) in one go');
+        util.error('Error: Parameters testsuite and testcase are not allowed when securitytest is used');
         return false;
     }
     if ('tags' in options) {
