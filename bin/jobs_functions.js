@@ -328,9 +328,9 @@ function dumpArrayAsJson(jsonData) {
 
 function csvLine(data, header = false) {
     if (header) {
-        return '"Status", "Project", "User", "Submitted", "Submitted Millis", "Time in Queue (ms)", "Run time (ms)", "Test Suite", "Test Case", "Tags", "Job Id"';
+        return '"Status", "Project", "User", "Submitted", "Submitted Millis", "Time in Queue (ms)", "Run time (ms)", "Test Suite", "Test Case", "Security Test", "Tags", "Job Id"';
     } else {
-        return sprintf('"%s", "%s", "%s", "%s", %d, %d, %d, "%s", "%s", "%s", "%s"',
+        return sprintf('"%s", "%s", "%s", "%s", %d, %d, %d, "%s", "%s", "%s", "%s", "%s"',
             util.csvQuoteQuotes(data.status),
             util.csvQuoteQuotes(data.projectName),
             util.csvQuoteQuotes(data.userName),
@@ -342,6 +342,8 @@ function csvLine(data, header = false) {
                 util.csvQuoteQuotes(data.executionParameters['testSuiteName']) : '',
             'testCaseName' in data.executionParameters ?
                 util.csvQuoteQuotes(data.executionParameters['testCaseName']) : '',
+            'securityTestName' in data.executionParameters ?
+                util.csvQuoteQuotes(data.executionParameters['securityTestName']) : '',
             'tags' in data.executionParameters ?
                 util.csvQuoteQuotes(data.executionParameters['tags'].join(', ')) : '',
             util.csvQuoteQuotes(data.testjobId),
@@ -351,11 +353,11 @@ function csvLine(data, header = false) {
 
 function textLine(data, header = false) {
     if (header) {
-        return sprintf('%-10s %-20s %-10s %-25s %-13s %-11s %-13s %-30s %-20s %-20s %-20s' +
+        return sprintf('%-10s %-20s %-10s %-25s %-13s %-11s %-13s %-30s %-20s %-20s %-20s %-20s' +
             '\n==========================================================================================================================================================================================================================',
-            "Status", "Project", "User", "Submitted", "Submitted ms", "Queued (ms)", "Run time (ms)", "Test Suite", "Test Case", "Tags", "Job Id");
+            "Status", "Project", "User", "Submitted", "Submitted ms", "Queued (ms)", "Run time (ms)", "Test Suite", "Test Case", "Security Test", "Tags", "Job Id");
     } else {
-        return sprintf('%-10s %-20s %-10s %-25s %13d %11d %13d %-30s %-20s %-20s %-20s',
+        return sprintf('%-10s %-20s %-10s %-25s %13d %11d %13d %-30s %-20s %-20s %-20s %-20s',
             util.csvQuoteQuotes(data.status),
             util.csvQuoteQuotes(data.projectName),
             util.csvQuoteQuotes(data.userName),
@@ -367,6 +369,8 @@ function textLine(data, header = false) {
                 util.csvQuoteQuotes(data.executionParameters['testSuiteName']) : '',
             'testCaseName' in data.executionParameters ?
                 util.csvQuoteQuotes(data.executionParameters['testCaseName']) : '',
+            'securityTestName' in data.executionParameters ?
+                util.csvQuoteQuotes(data.executionParameters['securityTestName']) : '',
             'tags' in data.executionParameters ?
                 util.csvQuoteQuotes(data.executionParameters['tags'].join(', ')) : '',
             util.csvQuoteQuotes(data.testjobId),
