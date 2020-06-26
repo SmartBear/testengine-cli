@@ -80,6 +80,7 @@ table includes the currently implemented options.
 | proxyUser | John  | Optional username to authenticate with the proxy|
 | proxyPassword | Secret!| Optional password to authenticate with the proxy|
 | projectPassword | abc123 | Password to unlock the project file (or password protected properties). Password protected projects which are depending on external files (data sources, attachments, certificates etc.) needs to be sent to TestEngine in a manually created zip file with all dependencies in the zip file root. Projects configured to only have specific properties encrypted will work as normal projects but require this parameter.|
+| priorityJob | N/A| The job will skip ahead of all non priority jobs in the queue (admin user needed)|
 
 If the user exits the CLI while the job is being run, it will output the command to use to cancel the job.
 e.g.

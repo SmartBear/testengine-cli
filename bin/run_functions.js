@@ -23,6 +23,7 @@ module.exports.dispatcher = function (args) {
         'testcase',
         '=async',
         '=skipdeps',
+        'priorityJob',
         'testsuite',
         'securitytest',
         'tags',
@@ -56,7 +57,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -190,6 +191,7 @@ function getQueryStringFromOptions(options) {
             case 'proxyPassword':
             case 'proxyHost':
             case 'proxyPort':
+            case 'priorityJob':
                 queryStringPart = key + '=' + encodeURI(options[key]);
                 break;
             default:
@@ -445,7 +447,7 @@ function executeProject(filename, project, options) {
                     }
                 } else if ('status' in res) {
                     if ('message' in res.response.body) {
-                        util.error("Error: " + res.response.body['message'])
+                        util.error("Error: " + res.response.body['message']);
                     } else {
                         util.error(res.response.text);
                     }
