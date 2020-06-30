@@ -451,7 +451,7 @@ function executeProject(filename, project, options) {
                     } else {
                         util.error(res.response.text);
                     }
-                    process.exit(1);
+                    process.exit();
                 }
             } else {
                 if (!('async' in options)) {
