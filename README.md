@@ -116,6 +116,11 @@ Each job has a job ID, with the command "jobs cancel" a running (or queued) job 
 
 `testengine jobs status <job ID>`
 
+### Print an execution report to the console'
+Each job has a job ID, with the command "jobs printReport" you can print execution report for a completed job.
+
+`testengine jobs printReport <job ID>`
+
 ### Request an execution report from the server'
 Each job has a job ID, with the command "jobs report" you can request the execution report for a completed job.
 The "output" argument is mandatory, "format" is optional.
