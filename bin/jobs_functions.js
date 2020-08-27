@@ -1,6 +1,6 @@
 'use strict';
 const util = require('./shared_utils');
-const prettyPrint = require('util');
+const utility = require('util');
 const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
@@ -132,7 +132,7 @@ function printReport (testjobId) {
                 }
                 return 1
             }
-            util.output(prettyPrint.inspect(jsonReport, { showHidden: false, depth: null, color: true }));
+            util.output(utility.inspect(jsonReport, { showHidden: false, depth: null}));
         });
 }
 
