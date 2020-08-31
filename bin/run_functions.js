@@ -21,13 +21,14 @@ module.exports.dispatcher = function (args) {
     let argsWithoutFilename = args.splice(1, args.length - 2);
     let options = util.optionsFromArgs(argsWithoutFilename, [
         'testcase',
-        '=async',
+        'async',
         '=skipdeps',
         'priorityJob',
         'testsuite',
         'securitytest',
         'tags',
         'environment',
+        '=printReport',
         'output',
         'reportFileName',
         'format',
@@ -57,7 +58,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -192,6 +193,9 @@ function getQueryStringFromOptions(options) {
             case 'proxyHost':
             case 'proxyPort':
             case 'priorityJob':
+                queryStringPart = key + '=' + encodeURI(options[key]);
+                break;
+            case 'async':
                 queryStringPart = key + '=' + encodeURI(options[key]);
                 break;
             default:
@@ -454,13 +458,16 @@ function executeProject(filename, project, options) {
                     process.exit();
                 }
             } else {
-                if (!('async' in options)) {
+                if (!options.async || !('async' in options)) {
                     // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there
                     //
                     if (!missingFiles) {
                         if (config.showProgress)
                             util.output('');
                         util.output("Result: " + status);
+                        if (options.printReport) {
+                            jobs.printReport(jobId);
+                        }
                         if ((jobId !== null)
                             && ((status !== 'CANCELED')
                                 && (status !== 'PENDING')

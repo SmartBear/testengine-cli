@@ -65,6 +65,7 @@ table includes the currently implemented options.
 | Option  | Sample Value  | Description|
 |---|---|---|
 | async  | N/A  | Run the project without waiting for results. The TestJobID will be printed on the console to make it possible to query status, get reports or cancel the job|
+| printReport  | N/A  | Print the execution report to the console for synchronous job after it is completed |
 | timeout| 30 | Specify a timeout for the running job. When the job has been running for the specified number of seconds, the job will fail and the report will include information that it timed out. If not specified, the job will always run until completed|
 | skipdeps | N/A | Do not scan project for dependencies. This will improve performance for large projects without dependencies to external files |
 | testsuite  | TestSuite1  | Name of a test suite to run|
