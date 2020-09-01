@@ -13,6 +13,7 @@ const JSZip = require("jszip");
 const sprintf = require('sprintf-js').sprintf;
 const jobs = require('./jobs_functions');
 const WebSocket = require('ws');
+const utility = require('util');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0) {
@@ -374,8 +375,12 @@ function executeProject(filename, project, options) {
                         if (err === null) {
                             status = result.body.status;
                             jobId = result.body['testjobId'];
-                            if (config.verbose || options.async)
+                            if (config.verbose || options.async) {
                                 util.output("TestJoB ID: " + jobId);
+                            } else {
+                                util.output(utility.inspect(result.body, { showHidden: false, depth: null}));
+                            }
+                                
                         } else {
                             status = 'ERROR';
                             if ('status' in err) {
@@ -465,9 +470,7 @@ function executeProject(filename, project, options) {
                         if (config.showProgress)
                             util.output('');
                         util.output("Result: " + status);
-                        if (options.printReport) {
-                            jobs.printReport(jobId);
-                        }
+                        
                         if ((jobId !== null)
                             && ((status !== 'CANCELED')
                                 && (status !== 'PENDING')

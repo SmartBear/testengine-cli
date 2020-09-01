@@ -72,8 +72,7 @@ module.exports = {
                 break;
         }
     },
-    reportForTestJob: reportForTestJob,
-    printReport: printReport
+    reportForTestJob: reportForTestJob
 };
 
 function printModuleHelp() {
