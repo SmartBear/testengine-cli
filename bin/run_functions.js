@@ -377,7 +377,13 @@ function executeProject(filename, project, options) {
                             jobId = result.body['testjobId'];
                             if (config.verbose || options.async) {
                                 util.output("TestJoB ID: " + jobId);
-                            } else {
+                            }
+                            
+                            if (('printReport' in options) && options.async) {
+                                util.output("Report is printed only for synchronous job");
+                            }
+                            
+                            if (!options.async && ('printReport' in options)) {
                                 util.output(utility.inspect(result.body, { showHidden: false, depth: null}));
                             }
                                 
