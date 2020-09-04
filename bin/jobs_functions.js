@@ -1,5 +1,6 @@
 'use strict';
 const util = require('./shared_utils');
+const utility = require('util');
 const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
@@ -44,6 +45,15 @@ module.exports = {
                 }
                 break;
             }
+            case 'printreport': {
+                if (args.length < 2) {
+                    printModuleHelp();
+                } else {
+                    const testJobId = args[ args.length - 1 ];
+                    printReport(testJobId);
+                }
+                break;
+            }
             case 'prune': {
                 let argumentCount = args.length;
                 let options = util.optionsFromArgs(args.splice(1), [
@@ -70,6 +80,7 @@ function printModuleHelp() {
     util.error("Commands: ");
     util.error("   list [format=text/csv/json] [user=username|list of usernames] [status=status|(list of statuses)]");
     util.error("   report output=<directory> [reportFileName=<filename>] [format=junit/excel/json/pdf] <testjobId>");
+    util.error("   printReport <testjobId>");
     util.error("   status <testjobId>");
     util.error("   cancel <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
@@ -101,6 +112,28 @@ function terminateTestJob(testjobId) {
                 util.output('Successfully canceled job');
             }
         })
+}
+
+function printReport (testjobId) {
+    const endPoint = config.server + '/api/v1/testjobs';
+    const url = endPoint + '/' + testjobId + '/report';
+    util.output(`Printing report for ${testjobId} ...`);
+    request.get(url)
+        .auth(config.username, config.password)
+        .accept('application/json')
+        .send()
+        .end((err, res) => {
+            const jsonReport = res.body;
+            if (err !== null) {
+                if (err.status === 404) {
+                    util.output(`Testjob with id ${testjobId} not found`);
+                } else {
+                    util.output(err.status + ': ' + err.message);
+                }
+                return 1
+            }
+            util.output(utility.inspect(jsonReport, { showHidden: false, depth: null}));
+        });
 }
 
 function reportForTestJob(testjobId, outputFolder, fileName, format) {
