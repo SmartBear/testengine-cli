@@ -4,7 +4,7 @@ const process = require('process');
 const request = require('superagent');
 const config = require('./config').config;
 const util = require('./shared_utils');
-const soapui = require('./soapui_project');
+const readyapi = require('./readyapi_project');
 const fs = require('fs');
 const async = require('async');
 const tmp = require('tmp');
@@ -138,9 +138,9 @@ function runProject(filename, options) {
             let project = null;
             if (!/.*[.][zZ][iI][pP]$/.test(filename)) {
                 if (!fs.lstatSync(filename).isDirectory()) {
-                    project = soapui.parse(filename);
+                    project = readyapi.parse(filename);
                 } else {
-                    project = soapui.parseComposite(filename);
+                    project = readyapi.parseComposite(filename);
                 }
             }
             executeProject(filename, project, options);
