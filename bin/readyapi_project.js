@@ -26,7 +26,7 @@ module.exports.parse = function (filename) {
 
     let jsonProject = parser.parse(fs.readFileSync(filename, {encoding: 'utf8'}), xmlParserOptions);
     if (!('con:soapui-project' in jsonProject)) {
-        throw "'" + filename + "' does not seem to be a soapUI project file";
+        throw "'" + filename + "' does not seem to be a ReadyAPI project file";
     }
     if ('con:encryptedContent' in jsonProject['con:soapui-project']) {
         throw "'" + filename + "' is encrypted and may have to be sent to the server as a zip file";
@@ -41,7 +41,7 @@ module.exports.parse = function (filename) {
         result['resourceRoot'] = resourceRoot;
         result['projectFiles'] = [filename];
     } else {
-        util.error("File doesn't seem to be a SoapUI project");
+        util.error("File doesn't seem to be a ReadyAPI project");
         return null;
     }
     return result;
