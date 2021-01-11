@@ -5,6 +5,10 @@ is to run ReadyAPI projects (functional API tests for primarily REST and SOAP se
 The TestEngine-CLI is a command line interface for the API of the product. The tool can handle most administration of the 
 server as well as submitting test jobs and requesting reports.
 
+## Install
+Install testengine cli globally:
+
+`npm install -g testengine-cli`
 ## Usage
 All communication with the ReadyAPI TestEngine requires three settings.
 * URL to TestEngine
@@ -111,6 +115,11 @@ following the list command, it is also possible to specify options to select for
 Each job has a job ID, with the command "jobs cancel" a running (or queued) job can be canceled.
 
 `testengine jobs cancel <job ID>`
+
+### Delete a job
+Each job has a job ID, with the command "jobs delete" a job can be deleted. A running/queued job must be canceled first to delete.
+
+`testengine jobs delete <job ID>`
 
 ### Get the status of a job, using job ID without generating a report
 Each job has a job ID, with the command "jobs cancel" a running (or queued) job can be canceled.
