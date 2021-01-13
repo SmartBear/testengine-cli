@@ -26,6 +26,14 @@ module.exports = {
                 }
                 break;
             }
+            case 'delete': {
+                if (args.length < 2) {
+                    printModuleHelp();
+                } else {
+                    deleteTestJob(args[1]);
+                }
+                break;
+            }
             case 'status': {
                 if (args.length < 2) {
                     printModuleHelp();
@@ -110,6 +118,36 @@ function terminateTestJob(testjobId) {
                 }
             } else {
                 util.output('Successfully canceled job');
+            }
+        })
+}
+
+function deleteTestJob(testjobId) {
+    let url = config.server + '/api/v1/testjobs'+ '/' + testjobId + '/delete';
+    util.output('Deleting job: '+testjobId);
+    request.delete(url)
+        .auth(config.username, config.password)
+        .accept('application/junit+xml')
+        .send()
+        .end((err, result) => {
+            if (err !== null) {
+                if (('status' in err) && ('message' in result.body)) {
+                    switch (err['status']) {
+                        case 403:
+                            util.error(err['status'] + ': ' + result.body['message']);
+                            break;
+                        case 404:
+                            util.output(`${err['status']}: Testjob not found`);
+                            break;
+                        default:
+                            util.error(err['status'] + ': ' + result.body['message']);
+                            return;
+                    }
+                } else {
+                    util.error(err);
+                }
+            } else {
+                util.output('Successfully deleted job');
             }
         })
 }
