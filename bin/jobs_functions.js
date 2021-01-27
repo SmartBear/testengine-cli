@@ -91,6 +91,7 @@ function printModuleHelp() {
     util.error("   printReport <testjobId>");
     util.error("   status <testjobId>");
     util.error("   cancel <testjobId>");
+    util.error("   delete <testjobId>");
     util.error("   prune [before=YYYY-MM-DD]");
     util.error("   help");
 }
