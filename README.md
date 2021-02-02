@@ -79,6 +79,9 @@ table includes the currently implemented options.
 | tags | "smoketest,regression"  | See description above|
 | output | c:\\temp\\reports  | Directory to store reports in.|
 | reportFileName |  N/A | File name for the report. If omitted, the report will get a name based on the test job ID|
+| callback | http://localhost:8080 | The URL, to which the results will be posted|
+| environment | dev | Specify the The target environment for test job. Can not be used with **endpoint**|
+| endpoint | localhost:8080 | The endpoint to be used for HTTP requests sent by this test, in the format host:[port]. Can not be used with **environment**|
 | format | excel | Specify the file type of the report. Currently supported formats are json, junit, excel and pdf. The default format is junit|
 | proxyHost | 172.0.1.10  | Hostname or IP of the server to use as a proxy for outgoing requests (from TestEngine)|
 | proxyPort | 8888  | Port of the proxyHost to contact for outgoing requests (from TestEngine)|
