@@ -196,7 +196,7 @@ function getQueryStringFromOptions(options) {
                 queryStringPart = 'callback=' + encodeURI(options[key]);
                 break;
             case 'endpoint':
-                queryStringPart = 'hostPort=' + encodeURI(options[key]);
+                queryStringPart = 'hostAndPort=' + encodeURI(options[key]);
                 break;
             case 'proxyUser':
                 queryStringPart = 'proxyUsername=' + encodeURI(options[key]);
