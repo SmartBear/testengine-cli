@@ -157,7 +157,7 @@ function runProject(filename, options) {
         }
     } else {
         util.error("Cannot open file: " + filename);
-
+        process.exit(1)
     }
 }
 
@@ -249,7 +249,7 @@ function executeProject(filename, project, options) {
     async.series([
             // First create a zip file, if needed.
             //
-            function (callback) {
+        function (callback) {
                 if (!isZipFile && (project !== null) && ((files.length > 0) || (project['projectFiles'].length > 1))) {
                     // We depend on files, we need to create and send a zip file
                     let projectRootPath = '';
@@ -400,20 +400,21 @@ function executeProject(filename, project, options) {
                                         }
                                         break;
                                     case 400:
-                                        util.error('Error: ' + result.body['message']);
+                                        util.error('Error: ' + result.body[ 'message' ]);
+                                        process.exit(1);
                                         break;
                                     default:
                                         callback(err);
-                                        return;
                                 }
                             } else {
                                 util.error(err);
+                                process.exit(100);
                             }
                         }
                         callback();
                     });
             },
-            function (callback) {
+        function (callback) {
                 if ('async' in options) {
                     callback();
                     return;
@@ -438,7 +439,6 @@ function executeProject(filename, project, options) {
                         await util.sleep(200);
                     },
                     function () {
-                        // callback();
                         if ((websocket !== null) && (websocket.readyState !== 0)) {
                             websocket.close();
                         }
@@ -456,9 +456,11 @@ function executeProject(filename, project, options) {
                 if ('code' in res) {
                     if (res.code === 'ECONNREFUSED') {
                         util.error(sprintf("Connection refused: %s:%d", res.address, res.port));
+                    } else if (res.code === 'ENOTFOUND') {
+                        const { host, port } = res;
+                        util.error(`Host ${host}:${port} does not exist.`);
                     } else {
                         util.error(res);
-                        process.exit(1);
                     }
                 } else if ('status' in res) {
                     if ('message' in res.response.body) {
@@ -466,8 +468,8 @@ function executeProject(filename, project, options) {
                     } else {
                         util.error(res.response.text);
                     }
-                    process.exit();
                 }
+                process.exit(100);
             } else {
                 if (!options.async || !('async' in options)) {
                     // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there

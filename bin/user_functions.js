@@ -6,6 +6,7 @@ const sprintf = require('sprintf-js').sprintf;
 const csv = require('csvtojson');
 const fs = require('fs');
 const util = require('./shared_utils');
+const process = require('process');
 
 module.exports.dispatcher = function(args) {
     if (args.length === 0)
@@ -60,7 +61,7 @@ module.exports.dispatcher = function(args) {
             break;
         default:
             util.error("Unknown operatation");
-            break;
+            process.exit(100);
     }
 };
 
@@ -101,7 +102,7 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
                     } else {
                         switch (err.status) {
                             case 422:
-                                util.error("Username or password is incorrect");
+                                util.error(err.response.body.message);
                                 break;
                             case 409:
                                 util.error('User "' + username + '" already exists.');
@@ -110,6 +111,7 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
                                 util.output(err.status + ': ' + err.message);
                         }
                     }
+                    process.exit(100);
                 } else {
                     util.output('Created ' + (isAdmin ? 'admin ' : '') + 'user "' + username + '"');
                 }
@@ -158,7 +160,8 @@ function importUsers(fileOrURL) {
                             user['admin'] ? 1 : 0));
                     } else {
                         util.error('User ' + user['username'] + ' could not be imported');
-                        util.error(err.status + ': ' + err.message);
+                        util.error(err.status + ': ' + err.response.body.message);
+                        process.exit(100);
                     }
                 });
             }
@@ -192,7 +195,7 @@ function updateUser(username, options) {
                 } else {
                     util.output(err.status + ': ' + err.message);
                 }
-                return 1
+                process.exit(100);
             }
             util.output('User "' + username + '"successfully updated');
         });
@@ -206,9 +209,9 @@ function deleteUser(username) {
         .end((err) => {
             if (err !== null) {
                 util.output(err.status + ': ' + err.message);
-                return 1
+                process.exit(100);
             }
-            util.output('User "' + username + '"successfully deleted');
+            util.output('User "' + username + '" successfully deleted');
         });
 }
 
@@ -229,7 +232,7 @@ function listUsers(options) {
                 } else {
                     util.output(err.status + ': ' + err.message);
                 }
-                return 1
+                process.exit(100);
             }
             switch (format) {
                 case 'csv':
@@ -240,7 +243,7 @@ function listUsers(options) {
                     break;
                 default:
                     util.error('Unrecognized format');
-                    break;
+                    process.exit(1)
             }
         });
 }

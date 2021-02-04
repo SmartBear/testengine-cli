@@ -5,6 +5,7 @@ const config = require('./config').config;
 const util = require('./shared_utils');
 const fs = require('fs');
 const path = require('path');
+const process = require('process');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0)
@@ -41,7 +42,7 @@ module.exports.dispatcher = function (args) {
             break;
         default:
             util.error("Unknown operatation");
-            break;
+            process.exit(100);
     }
 };
 
@@ -69,7 +70,7 @@ function installLicense(options, licenseOrLicenseServer) {
             break;
         default:
             util.error("Error: Specifying fixed or floating license is mandatory");
-            return;
+            process.exit(100);
 
     }
 }
@@ -95,6 +96,7 @@ function uninstallLicense() {
                             return;
                     }
                 }
+                process.exit(100);
             }
         });
 }
@@ -140,14 +142,17 @@ function installFixedLicense(options, licenseFile) {
                     } else {
                         util.error(err);
                     }
+                    process.exit(100);
                 }
             });
     });
     readStream.on('error', function (err) {
         util.error("Error: " + err.message);
         let ext = path.extname(licenseFile).toLowerCase();
-        if ((ext !== '.key') && (ext !== '.zip'))
+        if ((ext !== '.key') && (ext !== '.zip')) {
             util.error('"' + licenseFile + '" does not seem to be a .zip or .key file');
+        }
+        process.exit(100);
     });
 
 }
@@ -183,6 +188,7 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
                 } else {
                     util.error(err);
                 }
+                process.exit(100);
             }
         });
 }
@@ -215,6 +221,7 @@ function showLicenseInfo() {
                 } else {
                     util.error(err);
                 }
+                process.exit(100);
             }
         });
 

@@ -5,6 +5,7 @@ const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
 const fs = require('fs');
+const process = require('process');
 
 module.exports = {
     dispatcher: function (args) {
@@ -43,7 +44,7 @@ module.exports = {
                 break;
             }
             case 'report': {
-                if (args.length < 3) {
+                if (args.length < 4) {
                     printModuleHelp();
                 } else {
                     let jobId = args[args.length - 1];
@@ -77,7 +78,7 @@ module.exports = {
                 break;
             default:
                 util.error("Unknown operatation");
-                break;
+                process.exit(1);
         }
     },
     reportForTestJob: reportForTestJob
@@ -116,6 +117,7 @@ function terminateTestJob(testjobId) {
                 } else {
                     util.error(err);
                 }
+                process.exit(1);
             } else {
                 util.output('Successfully canceled job');
             }
@@ -146,6 +148,7 @@ function deleteTestJob(testjobId) {
                 } else {
                     util.error(err);
                 }
+                process.exit(1);
             } else {
                 util.output('Successfully deleted job');
             }
@@ -168,7 +171,7 @@ function printReport (testjobId) {
                 } else {
                     util.output(err.status + ': ' + err.message);
                 }
-                return 1
+                process.exit(1);
             }
             util.output(utility.inspect(jsonReport, { showHidden: false, depth: null}));
         });
@@ -210,11 +213,11 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                 default:
                     util.error("Invalid format: " + format);
                     contentType = '';
-                    break;
+                    process.exit(1);
             }
         } else {
             util.error("Output folder exists but is not a directory");
-            return;
+            process.exit(1);
         }
     }
     if (contentType !== '') {
@@ -235,6 +238,13 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     if (reportFileName) {
                         fs.unlinkSync(reportFileName)
                     }
+                    util.error(`Status code: ${response.status}`);
+                    process.exit(1)
+                }
+                
+                if (response.status === 200) {
+                    util.output('Report created successfully');
+                    process.exit(0);
                 }
             }).send();
         if (stream) {
@@ -256,6 +266,7 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     } else {
                         util.error(err);
                     }
+                    process.exit(1);
                 }
             })
         }
@@ -272,7 +283,7 @@ function listJobs(options) {
         .end((err, res) => {
             if (err !== null) {
                 util.output(err.status + ': ' + err.message);
-                return 1
+                process.exit(1);
             }
             let dataFromServer = res.body;
             if (Array.isArray(dataFromServer) && 'status' in options) {
@@ -294,7 +305,7 @@ function listJobs(options) {
                     break;
                 default:
                     util.error('Unrecognized format');
-                    break;
+                    process.exit(1);
             }
         });
 }
@@ -329,7 +340,7 @@ function pruneJobs(options) {
                     else
                         util.output(err.status + ': ' + err.message);
                 }
-                return 1
+                process.exit(1);
             }
             let jobsPruned = JSON.parse(res.request.response.body);
             util.output("Pruned " + jobsPruned + " jobs from the database.")
