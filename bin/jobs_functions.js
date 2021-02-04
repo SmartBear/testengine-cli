@@ -77,7 +77,7 @@ module.exports = {
                 printModuleHelp();
                 break;
             default:
-                util.error("Unknown operatation");
+                util.error("Unknown operation");
                 process.exit(1);
         }
     },
