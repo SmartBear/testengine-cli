@@ -41,8 +41,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.error("Unknown operation");
-            process.exit(100);
+            util.exitForUnknownOperation();
     }
 };
 

@@ -4,7 +4,6 @@ const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
 const util = require('./shared_utils');
-const process = require('process');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0)
@@ -25,8 +24,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.error("Unknown operation");
-            process.exit(100);
+            util.exitForUnknownOperation();
     }
 };
 

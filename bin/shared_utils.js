@@ -118,3 +118,8 @@ module.exports.optionsFromArgs = function (args, validArguments = null) {
     return ret;
 };
 
+module.exports.exitForUnknownOperation = function () {
+    module.exports.error("Unknown operation");
+    process.exit(200);
+}
+
