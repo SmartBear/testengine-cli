@@ -40,9 +40,7 @@ module.exports.dispatcher = function (args) {
         'proxyPassword',
         'projectPassword']);
 
-    if (conflictingOptionsCheck(options) === false) {
-        return;
-    }
+    conflictingOptionsCheck(options);
     switch (args[0].toLowerCase()) {
         case 'project':
             runProject(args[args.length - 1], options);
@@ -51,7 +49,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.exitForUnknownOperation();
+            util.printErrorAndExit("Unknown operation");
     }
 };
 
@@ -66,22 +64,17 @@ function printModuleHelp() {
 
 function conflictingOptionsCheck(options) {
     if (('securitytest' in options) && (('testcase' in options) || ('testsuite' in options))) {
-        util.error('Error: Parameters testsuite and testcase are not allowed when securitytest is used');
-        return false;
+        util.printErrorAndExit('Error: Parameters testsuite and testcase are not allowed when securitytest is used');
     }
     if ('tags' in options) {
         if (('testsuite' in options) || ('testcase' in options)) {
-            util.error('Error: tags cannot be used together with testcase/testsuite ');
-            return false;
+            util.printErrorAndExit('Error: tags cannot be used together with testcase/testsuite ');
         }
     }
     if (('testcase' in options)
         && !('testsuite' in options)) {
         util.error('Warning: Specifying testscase without testsuite can cause unpredictable results');
-        return true;
     }
-
-    return true;
 }
 
 function extractFilesFromJsonRepresentation(data, options) {
@@ -148,7 +141,7 @@ function runProject(filename, options) {
             if (typeof err === 'string') {
                 if (err.match(/is encrypted/)) {
                     if (!('projectPassword' in options))
-                        util.error('Error: Submitting encrypted projects without projectPassword will not work');
+                        util.printErrorAndExit('Error: Submitting encrypted projects without projectPassword will not work');
                     else
                         executeProject(filename, null, options);
                 }
@@ -394,13 +387,12 @@ function executeProject(filename, project, options) {
                                         if (Array.isArray(result.body)) {
                                             util.error("Project cannot be accepted, files missing:");
                                             for (let missingFile of result.body) {
-                                                util.error('   ' + missingFile['fileName']);
+                                                util.printErrorAndExit('   ' + missingFile['fileName']);
                                             }
                                         }
                                         break;
                                     case 400:
-                                        util.error('Error: ' + result.body[ 'message' ]);
-                                        process.exit(1);
+                                        util.printErrorAndExit('Error: ' + result.body[ 'message' ]);
                                         break;
                                     default:
                                         callback(err);
@@ -454,21 +446,20 @@ function executeProject(filename, project, options) {
             if (res) {
                 if ('code' in res) {
                     if (res.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", res.address, res.port));
+                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", res.address, res.port));
                     } else if (res.code === 'ENOTFOUND') {
                         const { host, port } = res;
-                        util.error(`Host ${host}:${port} does not exist.`);
+                        util.printErrorAndExit(`Host ${host}:${port} does not exist.`);
                     } else {
-                        util.error(res);
+                        util.printErrorAndExit(res);
                     }
                 } else if ('status' in res) {
                     if ('message' in res.response.body) {
-                        util.error("Error: " + res.response.body['message']);
+                        util.printErrorAndExit("Error: " + res.response.body['message']);
                     } else {
-                        util.error(res.response.text);
+                        util.printErrorAndExit(res.response.text);
                     }
                 }
-                process.exit(100);
             } else {
                 if (!options.async || !('async' in options)) {
                     // If status isn't CANCELED, PENDING or DISCONNECTED and we have an output directory, store reports there

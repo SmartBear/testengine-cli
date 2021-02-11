@@ -8,7 +8,7 @@ const fs = require('fs');
 const util = require('./shared_utils');
 const process = require('process');
 
-module.exports.dispatcher = function(args) {
+module.exports.dispatcher = function (args) {
     if (args.length === 0)
         return printModuleHelp();
 
@@ -60,7 +60,7 @@ module.exports.dispatcher = function(args) {
             printModuleHelp();
             break;
         default:
-            util.exitForUnknownOperation();
+            util.printErrorAndExit("Unknown operation")
     }
 };
 
@@ -88,32 +88,31 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
         .type('application/json')
         .send(payload)
         .end((err) => {
-            if (!silent)
+            if (!silent) {
                 if (err !== null) {
                     util.error('Failed to create ' + (isAdmin ? 'admin ' : '') + 'user "' + username + '"');
                     if ('code' in err) {
                         if (err.code === 'ECONNREFUSED') {
-                            util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                            util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
                         } else {
-                            util.error(sprintf("Error: %s:%s", err.code, err.message));
+                            util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
                         }
-                        return 1
                     } else {
                         switch (err.status) {
                             case 422:
-                                util.error(err.response.body.message);
+                                util.printErrorAndExit(err.response.body.message);
                                 break;
                             case 409:
-                                util.error('User "' + username + '" already exists.');
+                                util.printErrorAndExit('User "' + username + '" already exists.');
                                 break;
                             default:
-                                util.output(err.status + ': ' + err.message);
+                                util.printErrorAndExit(err.status + ': ' + err.message);
                         }
                     }
-                    process.exit(100);
                 } else {
                     util.output('Created ' + (isAdmin ? 'admin ' : '') + 'user "' + username + '"');
                 }
+            }
             if (callback) {
                 callback(err)
             }
@@ -122,6 +121,7 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
 
 function importUsers(fileOrURL) {
     let urlRegExp = /^[a-z]{1,5}[:][/]{2}/;
+    let failedImport = false;
 
     let stream = null;
     if (fileOrURL.match(urlRegExp) !== null) {
@@ -160,11 +160,18 @@ function importUsers(fileOrURL) {
                     } else {
                         util.error('User ' + user['username'] + ' could not be imported');
                         util.error(err.status + ': ' + err.response.body.message);
-                        process.exit(100);
+                        failedImport = true;
                     }
                 });
             }
-        })
+        }).on('done', (error) => {
+        if (error) {
+            util.error(error)
+        }
+        if (failedImport) {
+            process.exit(1);
+        }
+    });
 }
 
 function updateUser(username, options) {
@@ -187,14 +194,13 @@ function updateUser(username, options) {
             if (err !== null) {
                 if ('code' in err) {
                     if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
                     } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
+                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
                     }
                 } else {
-                    util.output(err.status + ': ' + err.message);
+                    util.printErrorAndExit(err.status + ': ' + err.message);
                 }
-                process.exit(100);
             }
             util.output('User "' + username + '"successfully updated');
         });
@@ -207,8 +213,7 @@ function deleteUser(username) {
         .send()
         .end((err) => {
             if (err !== null) {
-                util.output(err.status + ': ' + err.message);
-                process.exit(100);
+                util.printErrorAndExit(err.status + ': ' + err.message);
             }
             util.output('User "' + username + '" successfully deleted');
         });
@@ -224,14 +229,13 @@ function listUsers(options) {
             if (err !== null) {
                 if ('code' in err) {
                     if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
                     } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
+                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
                     }
                 } else {
-                    util.output(err.status + ': ' + err.message);
+                    util.printErrorAndExit(err.status + ': ' + err.message);
                 }
-                process.exit(100);
             }
             switch (format) {
                 case 'csv':

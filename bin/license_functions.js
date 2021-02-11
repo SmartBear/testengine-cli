@@ -41,7 +41,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.exitForUnknownOperation();
+            util.printErrorAndExit("Unknown operation");
     }
 };
 
@@ -68,9 +68,7 @@ function installLicense(options, licenseOrLicenseServer) {
             installFixedLicense(options, licenseOrLicenseServer);
             break;
         default:
-            util.error("Error: Specifying fixed or floating license is mandatory");
-            process.exit(100);
-
+            util.printErrorAndExit("Error: Specifying fixed or floating license is mandatory");
     }
 }
 
@@ -88,14 +86,12 @@ function uninstallLicense() {
                 if ('status' in err) {
                     switch (err['status']) {
                         case 403:
-                            util.error("User doesn't have enough credentials to uninstall a license");
+                            util.printErrorAndExit("User doesn't have permission to uninstall a license");
                             break;
                         default:
-                            util.error(err['status'] + ': ' + result.body['message']);
-                            return;
+                            util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
                     }
                 }
-                process.exit(100);
             }
         });
 }
@@ -125,23 +121,22 @@ function installFixedLicense(options, licenseFile) {
                     if ('status' in err) {
                         switch (err['status']) {
                             case 403:
-                                util.error("User doesn't have enough credentials to install a license");
+                                util.printErrorAndExit("User doesn't have permission to install a license");
                                 break;
                             case 400:
-                                util.error("Failed to install license, error: " + result.body['message']);
+                                util.printErrorAndExit("Failed to install license, error: " + result.body['message']);
                                 break;
                             default:
                                 if ('message' in result.body) {
-                                    util.error(err['status'] + ': ' + result.body['message']);
+                                    util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
                                 } else {
-                                    util.error(err['status'] + ': ' + err['message']);
+                                    util.printErrorAndExit(err['status'] + ': ' + err['message']);
                                 }
                                 return;
                         }
                     } else {
-                        util.error(err);
+                        util.printErrorAndExit(err);
                     }
-                    process.exit(100);
                 }
             });
     });
@@ -151,7 +146,7 @@ function installFixedLicense(options, licenseFile) {
         if ((ext !== '.key') && (ext !== '.zip')) {
             util.error('"' + licenseFile + '" does not seem to be a .zip or .key file');
         }
-        process.exit(100);
+        process.exit(1);
     });
 
 }
@@ -175,19 +170,17 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
                 if ('status' in err) {
                     switch (err['status']) {
                         case 403:
-                            util.error("User doesn't have enough credentials to install a license");
+                            util.printErrorAndExit("User doesn't have enough credentials to install a license");
                             break;
                         case 400:
-                            util.error("Failed to install license, error: " + result.body['message']);
+                            util.printErrorAndExit("Failed to install license, error: " + result.body['message']);
                             break;
                         default:
-                            util.error(err['status'] + ': ' + err['message']);
-                            return;
+                            util.printErrorAndExit(err['status'] + ': ' + err['message']);
                     }
                 } else {
-                    util.error(err);
+                    util.printErrorAndExit(err);
                 }
-                process.exit(100);
             }
         });
 }
@@ -208,19 +201,17 @@ function showLicenseInfo() {
                     switch (err['status']) {
                         case 401:
                         case 403:
-                            util.error("User doesn't have credentials to show license");
+                            util.printErrorAndExit("User doesn't have credentials to show license");
                             break;
                         case 404:
-                            util.error("No license installed");
+                            util.printErrorAndExit("No license installed");
                             break;
                         default:
-                            util.error(err['status'] + ': ' + err['message']);
-                            return;
+                            util.printErrorAndExit(err['status'] + ': ' + err['message']);
                     }
                 } else {
-                    util.error(err);
+                    util.printErrorAndExit(err);
                 }
-                process.exit(100);
             }
         });
 

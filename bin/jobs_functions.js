@@ -58,7 +58,7 @@ module.exports = {
                 if (args.length < 2) {
                     printModuleHelp();
                 } else {
-                    const testJobId = args[ args.length - 1 ];
+                    const testJobId = args[args.length - 1];
                     printReport(testJobId);
                 }
                 break;
@@ -77,7 +77,7 @@ module.exports = {
                 printModuleHelp();
                 break;
             default:
-                util.exitForUnknownOperation();
+                util.printErrorAndExit("Unknown operation");
         }
     },
     reportForTestJob: reportForTestJob
@@ -96,8 +96,8 @@ function printModuleHelp() {
 }
 
 function terminateTestJob(testjobId) {
-    let url = config.server + '/api/v1/testjobs'+ '/' + testjobId;
-    util.output('Canceling job: '+testjobId);
+    let url = config.server + '/api/v1/testjobs' + '/' + testjobId;
+    util.output('Canceling job: ' + testjobId);
     request.delete(url)
         .auth(config.username, config.password)
         .accept('application/junit+xml')
@@ -105,18 +105,10 @@ function terminateTestJob(testjobId) {
         .end((err, result) => {
             if (err !== null) {
                 if (('status' in err) && ('message' in result.body)) {
-                    switch (err['status']) {
-                        case 403:
-                            util.error(err['status'] + ': ' + result.body['message']);
-                            break;
-                        default:
-                            util.error(err['status'] + ': ' + result.body['message']);
-                            return;
-                    }
+                    util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
                 } else {
-                    util.error(err);
+                    util.printErrorAndExit(err);
                 }
-                process.exit(1);
             } else {
                 util.output('Successfully canceled job');
             }
@@ -124,8 +116,8 @@ function terminateTestJob(testjobId) {
 }
 
 function deleteTestJob(testjobId) {
-    let url = config.server + '/api/v1/testjobs'+ '/' + testjobId + '/delete';
-    util.output('Deleting job: '+testjobId);
+    let url = config.server + '/api/v1/testjobs' + '/' + testjobId + '/delete';
+    util.output('Deleting job: ' + testjobId);
     request.delete(url)
         .auth(config.username, config.password)
         .accept('application/junit+xml')
@@ -134,27 +126,22 @@ function deleteTestJob(testjobId) {
             if (err !== null) {
                 if (('status' in err) && ('message' in result.body)) {
                     switch (err['status']) {
-                        case 403:
-                            util.error(err['status'] + ': ' + result.body['message']);
-                            break;
                         case 404:
-                            util.output(`${err['status']}: Testjob not found`);
+                            util.printErrorAndExit(`${err['status']}: Testjob not found`);
                             break;
                         default:
-                            util.error(err['status'] + ': ' + result.body['message']);
-                            return;
+                            util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
                     }
                 } else {
-                    util.error(err);
+                    util.printErrorAndExit(err);
                 }
-                process.exit(1);
             } else {
                 util.output('Successfully deleted job');
             }
         })
 }
 
-function printReport (testjobId) {
+function printReport(testjobId) {
     const endPoint = config.server + '/api/v1/testjobs';
     const url = endPoint + '/' + testjobId + '/report';
     util.output(`Printing report for ${testjobId} ...`);
@@ -166,13 +153,12 @@ function printReport (testjobId) {
             const jsonReport = res.body;
             if (err !== null) {
                 if (err.status === 404) {
-                    util.output(`Testjob with id ${testjobId} not found`);
+                    util.printErrorAndExit(`Testjob with id ${testjobId} not found`);
                 } else {
-                    util.output(err.status + ': ' + err.message);
+                    util.printErrorAndExit(err.status + ': ' + err.message);
                 }
-                process.exit(1);
             }
-            util.output(utility.inspect(jsonReport, { showHidden: false, depth: null}));
+            util.output(utility.inspect(jsonReport, {showHidden: false, depth: null}));
         });
 }
 
@@ -210,17 +196,13 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     reportFilename += '.pdf';
                     break;
                 default:
-                    util.error("Invalid format: " + format);
-                    contentType = '';
-                    process.exit(1);
+                    util.printErrorAndExit("Invalid format: " + format);
             }
         } else {
-            util.error("Output folder exists but is not a directory");
-            process.exit(1);
+            util.printErrorAndExit("Output folder exists but is not a directory");
         }
     }
     if (contentType !== '') {
-        let success = true;
         let url = endPoint + '/' + testjobId + '/report';
         let stream;
         let reportFileName;
@@ -233,15 +215,11 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
             .accept(contentType)
             .on('response', function (response) {
                 if (response.status !== 200) {
-                    success = false;
                     if (reportFileName) {
                         fs.unlinkSync(reportFileName)
                     }
-                    util.error(`Status code: ${response.status}`);
-                    process.exit(1)
-                }
-                
-                if (response.status === 200) {
+                    util.printErrorAndExit(`Status code: ${response.status}`);
+                } else {
                     util.output('Report created successfully');
                     process.exit(0);
                 }
@@ -254,18 +232,10 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     util.output('Status of job ' + testjobId + ': ' + result.body.status);
                 } else {
                     if (('status' in err) && ('message' in result.body)) {
-                        switch (err['status']) {
-                            case 403:
-                                util.error(err['status'] + ': ' + result.body['message']);
-                                break;
-                            default:
-                                util.error(err['status'] + ': ' + result.body['message']);
-                                return;
-                        }
+                        util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
                     } else {
-                        util.error(err);
+                        util.printErrorAndExit(err);
                     }
-                    process.exit(1);
                 }
             })
         }
@@ -281,8 +251,7 @@ function listJobs(options) {
         .send()
         .end((err, res) => {
             if (err !== null) {
-                util.output(err.status + ': ' + err.message);
-                process.exit(1);
+                util.printErrorAndExit(err.status + ': ' + err.message);
             }
             let dataFromServer = res.body;
             if (Array.isArray(dataFromServer) && 'status' in options) {
@@ -303,8 +272,7 @@ function listJobs(options) {
                     dumpArrayAsJson(dataFromServer);
                     break;
                 default:
-                    util.error('Unrecognized format');
-                    process.exit(1);
+                    util.printErrorAndExit('Unrecognized format');
             }
         });
 }
@@ -318,7 +286,7 @@ function pruneJobs(options) {
             let date = new Date(parseInt(matchResult[1]), parseInt(matchResult[2]) - 1, parseInt(matchResult[3]));
             let tmpDate = date.toISOString();
             tmpDate = tmpDate.replace('.000Z', 'Z');
-            url += '?before='+encodeURIComponent(tmpDate);
+            url += '?before=' + encodeURIComponent(tmpDate);
         }
     }
     request.delete(url)
@@ -329,17 +297,16 @@ function pruneJobs(options) {
             if (err !== null) {
                 if ('code' in err) {
                     if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
                     } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
+                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
                     }
                 } else {
                     if ('message' in res.body)
-                        util.output(res.body['message']);
+                        util.printErrorAndExit(res.body['message']);
                     else
-                        util.output(err.status + ': ' + err.message);
+                        util.printErrorAndExit(err.status + ': ' + err.message);
                 }
-                process.exit(1);
             }
             let jobsPruned = JSON.parse(res.request.response.body);
             util.output("Pruned " + jobsPruned + " jobs from the database.")
