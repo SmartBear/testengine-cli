@@ -17,7 +17,8 @@ const utility = require('util');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0) {
-        return printModuleHelp();
+        printModuleHelp();
+        process.exit(1);
     }
     let argsWithoutFilename = args.splice(1, args.length - 2);
     let options = util.optionsFromArgs(argsWithoutFilename, [

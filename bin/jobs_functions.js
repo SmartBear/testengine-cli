@@ -9,8 +9,10 @@ const process = require('process');
 
 module.exports = {
     dispatcher: function (args) {
-        if (args.length === 0)
-            return printModuleHelp();
+        if (args.length === 0) {
+            printModuleHelp();
+            process.exit(1);
+        }
 
         switch (args[0].toLowerCase()) {
             case 'list': {
@@ -22,6 +24,7 @@ module.exports = {
             case 'cancel': {
                 if (args.length < 2) {
                     printModuleHelp();
+                    process.exit(1);
                 } else {
                     terminateTestJob(args[1]);
                 }
@@ -30,6 +33,7 @@ module.exports = {
             case 'delete': {
                 if (args.length < 2) {
                     printModuleHelp();
+                    process.exit(1);
                 } else {
                     deleteTestJob(args[1]);
                 }
@@ -38,6 +42,7 @@ module.exports = {
             case 'status': {
                 if (args.length < 2) {
                     printModuleHelp();
+                    process.exit(1);
                 } else {
                     reportForTestJob(args[1]);
                 }
@@ -46,6 +51,7 @@ module.exports = {
             case 'report': {
                 if (args.length < 4) {
                     printModuleHelp();
+                    process.exit(1);
                 } else {
                     let jobId = args[args.length - 1];
                     let options = util.optionsFromArgs(args.splice(1), [
@@ -57,6 +63,7 @@ module.exports = {
             case 'printreport': {
                 if (args.length < 2) {
                     printModuleHelp();
+                    process.exit(1);
                 } else {
                     const testJobId = args[args.length - 1];
                     printReport(testJobId);
@@ -150,7 +157,6 @@ function printReport(testjobId) {
         .accept('application/json')
         .send()
         .end((err, res) => {
-            const jsonReport = res.body;
             if (err !== null) {
                 if (err.status === 404) {
                     util.printErrorAndExit(`Testjob with id ${testjobId} not found`);
@@ -158,7 +164,10 @@ function printReport(testjobId) {
                     util.printErrorAndExit(err.status + ': ' + err.message);
                 }
             }
-            util.output(utility.inspect(jsonReport, {showHidden: false, depth: null}));
+            if (res) {
+                const jsonReport = res.body;
+                util.output(utility.inspect(jsonReport, {showHidden: false, depth: null}));
+            }
         });
 }
 

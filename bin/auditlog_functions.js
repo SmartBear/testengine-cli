@@ -4,15 +4,19 @@ const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
 const util = require('./shared_utils');
+const process = require('process');
 
 module.exports.dispatcher = function (args) {
-    if (args.length === 0)
-        return printModuleHelp();
+    if (args.length === 0) {
+        printModuleHelp();
+        process.exit(1);
+    }
 
     switch (args[0].toLowerCase()) {
         case 'dump':
             if (args.length < 1) {
                 printModuleHelp();
+                process.exit(1);
             } else {
                 let options = util.optionsFromArgs(args.splice(1), [
                     'format', 'date', 'user', 'limit', '=iso']);
@@ -60,17 +64,7 @@ function dumpAuditLog(options) {
         .type('application/json')
         .send()
         .end((err, result) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.printErrorAndExit(err.status + ': ' + err.message);
-                }
-            }
+            util.handleError(err);
             if (format === 'json') {
                 if ('limit' in options) {
                     util.output(JSON.stringify(result.body.slice(0, options['limit'])));

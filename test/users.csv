@@ -1,0 +1,10 @@
+username,password,admin
+correctAdmin,thepassword,true
+correctRegularUser,thepassword,false
+longrow,password,false,more
+shortrow,password
+shortpassword,pw,true
+,nousername,false
+nopassword,,false
+incorrectAdminString,password,blargh
+noadminstring,password,

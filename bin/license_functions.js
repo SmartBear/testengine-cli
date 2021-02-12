@@ -8,8 +8,10 @@ const path = require('path');
 const process = require('process');
 
 module.exports.dispatcher = function (args) {
-    if (args.length === 0)
-        return printModuleHelp();
+    if (args.length === 0) {
+        printModuleHelp();
+        process.exit(1);
+    }
 
     switch (args[0].toLowerCase()) {
         case 'install': {
@@ -21,6 +23,7 @@ module.exports.dispatcher = function (args) {
                 'email']);
             if (args.length < 2) {
                 printModuleHelp();
+                process.exit(1);
             } else {
                 installLicense(options, args[args.length - 1]);
             }
@@ -29,6 +32,7 @@ module.exports.dispatcher = function (args) {
         case 'uninstall':
             if (args.length < 1) {
                 printModuleHelp();
+                process.exit(1);
             } else {
                 uninstallLicense()
             }

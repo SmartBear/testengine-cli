@@ -9,13 +9,15 @@ const util = require('./shared_utils');
 const process = require('process');
 
 module.exports.dispatcher = function (args) {
-    if (args.length === 0)
-        return printModuleHelp();
+    if (args.length === 0) {
+        printModuleHelp();
+        process.exit(1);
+    }
 
     switch (args[0].toLowerCase()) {
         case 'add':
             if (args.length < 3) {
-                util.error("Usage: testengine user add <username> <password>");
+                util.printErrorAndExit("Usage: testengine user add <username> <password>");
             } else {
                 addUser(args[1], args[2])
             }
@@ -23,7 +25,7 @@ module.exports.dispatcher = function (args) {
 
         case 'import':
             if (args.length < 2) {
-                util.error("Usage: testengine user import <file/url>");
+                util.printErrorAndExit("Usage: tes tengine user import <file/url>");
             } else {
                 importUsers(args[1])
             }
@@ -31,7 +33,7 @@ module.exports.dispatcher = function (args) {
 
         case 'edit':
             if (args.length < 3) {
-                util.error("Usage: testengine user edit <username> [password=newpassword] [admin=true/false]");
+                util.printErrorAndExit("Usage: testengine user edit <username> [password=newpassword] [admin=true/false]");
             } else {
                 let options = util.optionsFromArgs(args.splice(2), [
                     'password', 'admin']);
@@ -51,7 +53,7 @@ module.exports.dispatcher = function (args) {
         case 'del':
         case 'delete':
             if (args.length < 2) {
-                return util.error("Usage: testengine user delete <username>");
+                util.printErrorAndExit("Usage: testengine user delete <username>");
             } else {
                 deleteUser(args[1]);
             }
@@ -141,35 +143,35 @@ function importUsers(fileOrURL) {
                 }
             }
         }
-    }).fromStream(stream)
-        .then((jsonObj) => {
-            for (let user of jsonObj) {
-                let isAdmin = false;
-                if ('admin' in user) {
-                    isAdmin = user['admin'];
-                }
-                if (!('password' in user)) {
-                    user['password'] = createRandomPassword();
-                }
-                addUser(user['username'], user['password'], isAdmin, true, (err) => {
-                    if (err == null) {
-                        util.output(sprintf("%s,%s,%d",
-                            util.csvQuoteQuotes(user['username']),
-                            util.csvQuoteQuotes(user['password']),
-                            user['admin'] ? 1 : 0));
-                    } else {
-                        util.error('User ' + user['username'] + ' could not be imported');
-                        util.error(err.status + ': ' + err.response.body.message);
-                        failedImport = true;
-                    }
-                });
+    }).fromStream(stream).then((jsonObj) => {
+        for (let i = 0; i < jsonObj.length; ++i) {
+            let user = jsonObj[i];
+            let isAdmin = false;
+            if ('admin' in user) {
+                isAdmin = user['admin'];
             }
-        }).on('done', (error) => {
-        if (error) {
-            util.error(error)
-        }
-        if (failedImport) {
-            process.exit(1);
+            if (!('password' in user)) {
+                user['password'] = createRandomPassword();
+            }
+            addUser(user['username'], user['password'], isAdmin, true, (err) => {
+                if (err == null) {
+                    util.output(sprintf("%s,%s,%d",
+                        util.csvQuoteQuotes(user['username']),
+                        util.csvQuoteQuotes(user['password']),
+                        user['admin'] ? 1 : 0));
+                } else {
+                    util.error('User ' + user['username'] + ' could not be imported');
+                    if (err.response) {
+                        util.error(err.status + ': ' + err.response.body.message);
+                    } else {
+                        util.error(err);
+                    }
+                    failedImport = true;
+                }
+                if (failedImport && i === jsonObj.length - 1) {
+                    process.exit(1);
+                }
+            });
         }
     });
 }
@@ -191,18 +193,8 @@ function updateUser(username, options) {
         .type('application/json')
         .send(payload)
         .end((err) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.printErrorAndExit(err.status + ': ' + err.message);
-                }
-            }
-            util.output('User "' + username + '"successfully updated');
+            util.handleError(err);
+            util.output('User "' + username + '" successfully updated');
         });
 }
 
@@ -226,17 +218,7 @@ function listUsers(options) {
         .accept('application/json')
         .send()
         .end((err, res) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.printErrorAndExit(err.status + ': ' + err.message);
-                }
-            }
+            util.handleError(err);
             switch (format) {
                 case 'csv':
                     dumpArrayAsCSV(res.body);

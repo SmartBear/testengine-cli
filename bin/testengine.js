@@ -61,6 +61,7 @@ if (program.args.length > 0) {
             break;
         default:
             program.outputHelp();
+            process.exit(1);
             break;
     }
 }
