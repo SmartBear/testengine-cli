@@ -28,6 +28,7 @@ module.exports.dispatcher = function (args) {
         'testsuite',
         'securitytest',
         'tags',
+        '=treatFailedRunAsError',
         'callback',
         'endpoint',
         'environment',
@@ -61,7 +62,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>] [endpoint=<host:port>] [callback=<url>]");
+    util.error("   project [testsuite=<name>] [async] [treatFailedRunAsError] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>] [endpoint=<host:port>] [callback=<url>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -82,6 +83,11 @@ function conflictingOptionsCheck(options) {
 
     if(('endpoint' in options) && ('environment' in options)) {
         util.error('Error: environment cannot be used together with endpoint.');
+        return false;
+    }
+
+    if(('treatFailedRunAsError' in options) && ('async' in options)) {
+        util.error('Error: treatFailedRunAsError cannot be used together with async.');
         return false;
     }
 
@@ -489,7 +495,7 @@ function executeProject(filename, project, options) {
                         if (config.showProgress)
                             util.output('');
                         util.output("Result: " + status);
-                        
+
                         if ((jobId !== null)
                             && ((status !== 'CANCELED')
                                 && (status !== 'PENDING')
@@ -499,7 +505,12 @@ function executeProject(filename, project, options) {
                             }
                         }
                     }
+
                     jobId = null;
+
+                    if (('treatFailedRunAsError' in options) && (status == 'FAILED')) {
+                        process.exit(1);
+                    }
                 }
             }
         }
