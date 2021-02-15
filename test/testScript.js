@@ -13,16 +13,16 @@ const licenseServer = 'localhost:1194';
 
 function startJob(projectPath) {
     let startJob = [baseCli, 'run project', projectPath, '-c admin.config'].join(' ');
-    let extractTestJobId = baseCli + " jobs list -c admin.config -c admin.config|sed -n 3p |sed 's/ *$//g'|rev|cut -d ' ' -f 2|rev"
-    exec(startJob)
-    let jobId = execSync(extractTestJobId).toString().trim()
-    return jobId
+    let extractTestJobId = baseCli + " jobs list -c admin.config -c admin.config|sed -n 3p |sed 's/ *$//g'|rev|cut -d ' ' -f 2|rev";
+    exec(startJob);
+    let jobId = execSync(extractTestJobId).toString().trim();
+    return jobId;
 }
 
 function runAllCombinations(commands, flags, fn) {
     for (let i = 0; i < commands.length; ++i) {
         for (let j = 0; j < flags.length; ++j) {
-            fn(commands[i], flags[j])
+            fn(commands[i], flags[j]);
         }
     }
 }
@@ -37,12 +37,10 @@ function runCli(command, flag, jobId = '') {
     }
 }
 
-
 function startSlowJobAndThenRunCli(command, flag) {
-    let testJobId = startJob('slow.xml')
-    runCli(command, flag, testJobId)
+    let testJobId = startJob('slow.xml');
+    runCli(command, flag, testJobId);
 }
-
 
 let commands = ['auditlog',
     'auditlog dump',
@@ -107,7 +105,7 @@ let commands = ['auditlog',
     'license install type=floating firstName=oskar ' + licenseServer,
     'license install type=floating lastName=oskarsson ' + licenseServer,
     'license install type=floating email=oskar@oskarsson.com ' + licenseServer,
-    'license install type=floating firstName=oskar lastName=oskarsson email=oskar@oskarsson.com ' + licenseServer]
+    'license install type=floating firstName=oskar lastName=oskarsson email=oskar@oskarsson.com ' + licenseServer];
 
 let flags = ['-C',
     '-c',
@@ -115,7 +113,7 @@ let flags = ['-C',
     '-H localhost:1231',
     '-H localhost:8080',
     '-c regularUser.config',
-    '-c admin.config']
+    '-c admin.config'];
 
 let jobCommands = ['jobs status',
     'jobs printReport',
@@ -128,9 +126,9 @@ let jobCommands = ['jobs status',
     'jobs report output=output reportFileName=report format=excel',
     'jobs report output=output reportFileName=report format=json',
     'jobs report output=output reportFileName=report format=pdf',
-    'jobs report output=. reportFileName=report format=noneExisting']
+    'jobs report output=. reportFileName=report format=noneExisting'];
 
 runAllCombinations(commands, flags, (command, flag) => runCli(command, flag));
 let testJobId = startJob('successful.xml');
 runAllCombinations(jobCommands, flags, (command, flag) => runCli(command, flag, testJobId));
-runAllCombinations(['jobs cancel'], flags, startSlowJobAndThenRunCli)
+runAllCombinations(['jobs cancel'], flags, startSlowJobAndThenRunCli);
