@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="f86cdbbf-e252-4f90-87bd-7d80934c52b8" created="3.5.1" activeEnvironment="Default environment" name="Successful" resourceRoot="" updated="3.5.1 2020-12-09T14:26:21Z" xmlns:con="http://eviware.com/soapui/config">
+<con:soapui-project id="f86cdbbf-e252-4f90-87bd-7d80934c52b8" created="3.5.1" activeEnvironment="Default environment" name="Successful" resourceRoot="" updated="3.5.1 2020-12-09T14:26:21Z" encryptionMode="Not encrypted" xmlns:con="http://eviware.com/soapui/config">
   <con:settings/>
   <con:testSuite id="6eb312d4-821a-41a8-9db1-fb319f888251" name="TestSuite 1">
     <con:settings/>

@@ -39,6 +39,10 @@ When a config file is present, it is possible to override the values using the c
 There is currently no support for encrypting the config file but normal file system security should make it possible to
 restrict reading it to the user running the tool.
 
+TestEngine-CLI will return with exit status code 0 if it successfully carried out the operation. It will return with 
+exit status code 1 if it failed to execute the command or parts of, including if a test job fails when it tries to run
+a project or some user couldn't  be added while importing.
+
 ## Test Jobs
 The tool can submit test jobs, list jobs which has been submitted (only admins can see other users' jobs) and purge old
 jobs from the server.
