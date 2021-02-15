@@ -25,7 +25,7 @@ module.exports.dispatcher = function (args) {
 
         case 'import':
             if (args.length < 2) {
-                util.printErrorAndExit("Usage: tes tengine user import <file/url>");
+                util.printErrorAndExit("Usage: testengine user import <file/url>");
             } else {
                 importUsers(args[1])
             }
@@ -62,7 +62,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.printErrorAndExit("Unknown operation")
+            util.printErrorAndExit("Unknown operation");
     }
 };
 
