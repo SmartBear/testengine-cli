@@ -2,6 +2,7 @@
 
 const config = require('./config').config;
 const process = require('process');
+const sprintf = require('sprintf-js').sprintf;
 
 module.exports.csvQuoteQuotes = function (stringValue) {
     return stringValue.replace(/["]/g, '""');
@@ -16,7 +17,7 @@ module.exports.booleanValue = function (unknownValue) {
 };
 
 
-module.exports.output = function (message, appendNewLine=true) {
+module.exports.output = function (message, appendNewLine = true) {
     if (!config.quiet) {
         process.stdout.write(message);
         if (appendNewLine)
@@ -117,4 +118,23 @@ module.exports.optionsFromArgs = function (args, validArguments = null) {
     }
     return ret;
 };
+
+module.exports.handleError = function (err) {
+    if (err !== null) {
+        if ('code' in err) {
+            if (err.code === 'ECONNREFUSED') {
+                module.exports.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
+            } else {
+                module.exports.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
+            }
+        } else {
+            module.exports.printErrorAndExit(err.status + ': ' + err.message);
+        }
+    }
+}
+
+module.exports.printErrorAndExit = function (errorMessage) {
+    module.exports.error(errorMessage);
+    process.exit(1);
+}
 

@@ -26,10 +26,10 @@ module.exports.parse = function (filename) {
 
     let jsonProject = parser.parse(fs.readFileSync(filename, {encoding: 'utf8'}), xmlParserOptions);
     if (!('con:soapui-project' in jsonProject)) {
-        throw "'" + filename + "' does not seem to be a ReadyAPI project file";
+        util.printErrorAndExit(`${filename} does not seem to be a ReadyAPI project file`);
     }
-    if ('con:encryptedContent' in jsonProject['con:soapui-project']) {
-        throw "'" + filename + "' is encrypted and may have to be sent to the server as a zip file";
+    if ('con:encryptedContent' in jsonProject[ 'con:soapui-project' ]) {
+        util.printErrorAndExit(`${filename} is encrypted and may have to be sent to the server as a zip file`);
     }
     if ("con:soapui-project" in jsonProject) {
         result = postProcessStructure(jsonProject);
@@ -41,29 +41,26 @@ module.exports.parse = function (filename) {
         result['resourceRoot'] = resourceRoot;
         result['projectFiles'] = [filename];
     } else {
-        util.error("File doesn't seem to be a ReadyAPI project");
-        return null;
+        util.printErrorAndExit("File doesn't seem to be a ReadyAPI project");
     }
     return result;
 };
 
 module.exports.parseComposite = function (pathname) {
-
     let result;
-
     let jsonProject;
 
     if (!fs.lstatSync(pathname).isDirectory()) {
-        throw pathname + ' doesn\'t point to a directory';
+        util.printErrorAndExit(`${pathname} doesn't point to a directory`);
     }
     if (!fs.existsSync(pathname + path.sep + 'settings.xml')) {
-        throw pathname + ' doesn\'t point to a composite project (settings.xml missing)';
+        util.printErrorAndExit(`${pathname} doesn't point to a composite project (settings.xml missing)`);
     }
     if (!fs.existsSync(pathname + path.sep + 'element.order')) {
-        throw pathname + ' doesn\'t point to a composite project (element.order missing)';
+        util.printErrorAndExit(`${pathname} doesn't point to a composite project (element.order missing)`);
     }
     if (!fs.existsSync(pathname + path.sep + 'project.content')) {
-        throw pathname + ' doesn\'t point to a composite project (project.content missing)';
+        util.printErrorAndExit(`${pathname} doesn't point to a composite project (project.content missing)`);
     }
     let filename = pathname + path.sep + 'settings.xml';
     jsonProject = parser.parse(fs.readFileSync(filename, {encoding: 'utf8'}), xmlParserOptions);
