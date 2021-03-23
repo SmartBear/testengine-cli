@@ -4,15 +4,19 @@ const request = require('superagent');
 const config = require('./config').config;
 const sprintf = require('sprintf-js').sprintf;
 const util = require('./shared_utils');
+const process = require('process');
 
 module.exports.dispatcher = function (args) {
-    if (args.length === 0)
-        return printModuleHelp();
+    if (args.length === 0) {
+        printModuleHelp();
+        process.exit(1);
+    }
 
     switch (args[0].toLowerCase()) {
         case 'dump':
             if (args.length < 1) {
                 printModuleHelp();
+                process.exit(1);
             } else {
                 let options = util.optionsFromArgs(args.splice(1), [
                     'format', 'date', 'user', 'limit', '=iso']);
@@ -24,8 +28,7 @@ module.exports.dispatcher = function (args) {
             printModuleHelp();
             break;
         default:
-            util.error("Unknown operatation");
-            break;
+            util.printErrorAndExit("Unknown operation");
     }
 };
 
@@ -61,18 +64,7 @@ function dumpAuditLog(options) {
         .type('application/json')
         .send()
         .end((err, result) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.output(err.status + ': ' + err.message);
-                }
-                return 1
-            }
+            util.handleError(err);
             if (format === 'json') {
                 if ('limit' in options) {
                     util.output(JSON.stringify(result.body.slice(0, options['limit'])));
@@ -82,7 +74,7 @@ function dumpAuditLog(options) {
             } else {
                 printAuditLogHeader(format);
                 let counter = 0;
-                let maxItems = 'limit' in options?options['limit']:1e10;
+                let maxItems = 'limit' in options ? options['limit'] : 1e10;
                 let isoTime = 'iso' in options;
                 for (let line of result.body) {
                     printAuditLogLine(line, format, isoTime);

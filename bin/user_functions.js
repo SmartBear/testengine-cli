@@ -6,15 +6,18 @@ const sprintf = require('sprintf-js').sprintf;
 const csv = require('csvtojson');
 const fs = require('fs');
 const util = require('./shared_utils');
+const process = require('process');
 
-module.exports.dispatcher = function(args) {
-    if (args.length === 0)
-        return printModuleHelp();
+module.exports.dispatcher = function (args) {
+    if (args.length === 0) {
+        printModuleHelp();
+        process.exit(1);
+    }
 
     switch (args[0].toLowerCase()) {
         case 'add':
             if (args.length < 3) {
-                util.error("Usage: testengine user add <username> <password>");
+                util.printErrorAndExit("Usage: testengine user add <username> <password>");
             } else {
                 addUser(args[1], args[2])
             }
@@ -22,7 +25,7 @@ module.exports.dispatcher = function(args) {
 
         case 'import':
             if (args.length < 2) {
-                util.error("Usage: testengine user import <file/url>");
+                util.printErrorAndExit("Usage: testengine user import <file/url>");
             } else {
                 importUsers(args[1])
             }
@@ -30,7 +33,7 @@ module.exports.dispatcher = function(args) {
 
         case 'edit':
             if (args.length < 3) {
-                util.error("Usage: testengine user edit <username> [password=newpassword] [admin=true/false]");
+                util.printErrorAndExit("Usage: testengine user edit <username> [password=newpassword] [admin=true/false]");
             } else {
                 let options = util.optionsFromArgs(args.splice(2), [
                     'password', 'admin']);
@@ -50,7 +53,7 @@ module.exports.dispatcher = function(args) {
         case 'del':
         case 'delete':
             if (args.length < 2) {
-                return util.error("Usage: testengine user delete <username>");
+                util.printErrorAndExit("Usage: testengine user delete <username>");
             } else {
                 deleteUser(args[1]);
             }
@@ -59,8 +62,7 @@ module.exports.dispatcher = function(args) {
             printModuleHelp();
             break;
         default:
-            util.error("Unknown operatation");
-            break;
+            util.printErrorAndExit("Unknown operation");
     }
 };
 
@@ -88,31 +90,31 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
         .type('application/json')
         .send(payload)
         .end((err) => {
-            if (!silent)
+            if (!silent) {
                 if (err !== null) {
                     util.error('Failed to create ' + (isAdmin ? 'admin ' : '') + 'user "' + username + '"');
                     if ('code' in err) {
                         if (err.code === 'ECONNREFUSED') {
-                            util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
+                            util.printErrorAndExit(sprintf("Connection refused: %s:%d", err.address, err.port));
                         } else {
-                            util.error(sprintf("Error: %s:%s", err.code, err.message));
+                            util.printErrorAndExit(sprintf("Error: %s:%s", err.code, err.message));
                         }
-                        return 1
                     } else {
                         switch (err.status) {
                             case 422:
-                                util.error("Username or password is incorrect");
+                                util.printErrorAndExit(err.response.body.message);
                                 break;
                             case 409:
-                                util.error('User "' + username + '" already exists.');
+                                util.printErrorAndExit('User "' + username + '" already exists.');
                                 break;
                             default:
-                                util.output(err.status + ': ' + err.message);
+                                util.printErrorAndExit(err.status + ': ' + err.message);
                         }
                     }
                 } else {
                     util.output('Created ' + (isAdmin ? 'admin ' : '') + 'user "' + username + '"');
                 }
+            }
             if (callback) {
                 callback(err)
             }
@@ -121,6 +123,7 @@ function addUser(username, password, isAdmin = false, silent = false, callback =
 
 function importUsers(fileOrURL) {
     let urlRegExp = /^[a-z]{1,5}[:][/]{2}/;
+    let failedImport = false;
 
     let stream = null;
     if (fileOrURL.match(urlRegExp) !== null) {
@@ -140,29 +143,37 @@ function importUsers(fileOrURL) {
                 }
             }
         }
-    }).fromStream(stream)
-        .then((jsonObj) => {
-            for (let user of jsonObj) {
-                let isAdmin = false;
-                if ('admin' in user) {
-                    isAdmin = user['admin'];
-                }
-                if (!('password' in user)) {
-                    user['password'] = createRandomPassword();
-                }
-                addUser(user['username'], user['password'], isAdmin, true, (err) => {
-                    if (err == null) {
-                        util.output(sprintf("%s,%s,%d",
-                            util.csvQuoteQuotes(user['username']),
-                            util.csvQuoteQuotes(user['password']),
-                            user['admin'] ? 1 : 0));
-                    } else {
-                        util.error('User ' + user['username'] + ' could not be imported');
-                        util.error(err.status + ': ' + err.message);
-                    }
-                });
+    }).fromStream(stream).then((jsonObj) => {
+        for (let i = 0; i < jsonObj.length; ++i) {
+            let user = jsonObj[i];
+            let isAdmin = false;
+            if ('admin' in user) {
+                isAdmin = user['admin'];
             }
-        })
+            if (!('password' in user)) {
+                user['password'] = createRandomPassword();
+            }
+            addUser(user['username'], user['password'], isAdmin, true, (err) => {
+                if (err == null) {
+                    util.output(sprintf("%s,%s,%d",
+                        util.csvQuoteQuotes(user['username']),
+                        util.csvQuoteQuotes(user['password']),
+                        user['admin'] ? 1 : 0));
+                } else {
+                    util.error('User ' + user['username'] + ' could not be imported');
+                    if (err.response) {
+                        util.error(err.status + ': ' + err.response.body.message);
+                    } else {
+                        util.error(err);
+                    }
+                    failedImport = true;
+                }
+                if (failedImport && i === jsonObj.length - 1) {
+                    process.exit(1);
+                }
+            });
+        }
+    });
 }
 
 function updateUser(username, options) {
@@ -182,19 +193,8 @@ function updateUser(username, options) {
         .type('application/json')
         .send(payload)
         .end((err) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.output(err.status + ': ' + err.message);
-                }
-                return 1
-            }
-            util.output('User "' + username + '"successfully updated');
+            util.handleError(err);
+            util.output('User "' + username + '" successfully updated');
         });
 }
 
@@ -205,10 +205,9 @@ function deleteUser(username) {
         .send()
         .end((err) => {
             if (err !== null) {
-                util.output(err.status + ': ' + err.message);
-                return 1
+                util.printErrorAndExit(err.status + ': ' + err.message);
             }
-            util.output('User "' + username + '"successfully deleted');
+            util.output('User "' + username + '" successfully deleted');
         });
 }
 
@@ -219,18 +218,7 @@ function listUsers(options) {
         .accept('application/json')
         .send()
         .end((err, res) => {
-            if (err !== null) {
-                if ('code' in err) {
-                    if (err.code === 'ECONNREFUSED') {
-                        util.error(sprintf("Connection refused: %s:%d", err.address, err.port));
-                    } else {
-                        util.error(sprintf("Error: %s:%s", err.code, err.message));
-                    }
-                } else {
-                    util.output(err.status + ': ' + err.message);
-                }
-                return 1
-            }
+            util.handleError(err);
             switch (format) {
                 case 'csv':
                     dumpArrayAsCSV(res.body);
@@ -240,7 +228,7 @@ function listUsers(options) {
                     break;
                 default:
                     util.error('Unrecognized format');
-                    break;
+                    process.exit(1)
             }
         });
 }
