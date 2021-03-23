@@ -256,7 +256,7 @@ function executeProject(filename, project, options) {
     async.series([
             // First create a zip file, if needed.
             //
-            function (callback) {
+        function (callback) {
                 if (!isZipFile && (project !== null) && ((files.length > 0) || (project['projectFiles'].length > 1))) {
                     // We depend on files, we need to create and send a zip file
                     let projectRootPath = '';
