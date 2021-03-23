@@ -419,7 +419,7 @@ function executeProject(filename, project, options) {
                         callback();
                     });
             },
-            function (callback) {
+        function (callback) {
                 if ('async' in options) {
                     callback();
                     return;
