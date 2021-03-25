@@ -30,7 +30,7 @@ module.exports.dispatcher = function (args) {
         'securitytest',
         'tags',
         'callback',
-        'endpoint',
+        'hostAndPort',
         'environment',
         '=printReport',
         'output',
@@ -59,7 +59,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>] [endpoint=<host:port>] [callback=<url>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>] [hostAndPort=<host:port>] [callback=<url>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -76,8 +76,8 @@ function conflictingOptionsCheck(options) {
         }
     }
 
-    if(('endpoint' in options) && ('environment' in options)) {
-        util.printErrorAndExit('Error: environment cannot be used together with endpoint');
+    if(('hostAndPort' in options) && ('environment' in options)) {
+        util.printErrorAndExit('Error: environment cannot be used together with hostAndPort');
     }
 
     if (('testcase' in options)
@@ -188,7 +188,7 @@ function getQueryStringFromOptions(options) {
             case 'callback':
                 queryStringPart = 'callback=' + encodeURI(options[key]);
                 break;
-            case 'endpoint':
+            case 'hostAndPort':
                 queryStringPart = 'hostAndPort=' + encodeURI(options[key]);
                 break;
             case 'proxyUser':
