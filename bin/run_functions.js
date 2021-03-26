@@ -29,6 +29,8 @@ module.exports.dispatcher = function (args) {
         'testsuite',
         'securitytest',
         'tags',
+        'callback',
+        'hostAndPort',
         'environment',
         '=printReport',
         'output',
@@ -57,7 +59,7 @@ module.exports.dispatcher = function (args) {
 function printModuleHelp() {
     util.error("Usage: testengine run <command>");
     util.error("Commands: ");
-    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>]");
+    util.error("   project [testsuite=<name>] [async] [skipdeps] [priorityJob] [testcase=<name>] [securitytest=<name>] [timeout=<seconds>] [tags=(tag1,tag2)] [output=<directory>] [printReport] [reportFileName=<filename>] [format=junit/excel/json/pdf] [environment=<environment name>] [hostAndPort=<host:port>] [callback=<url>]");
     util.error("           [projectPassword=<password>] [proxyHost=<hostname>] [proxyPort=<port>] [proxyUser=<username>]");
     util.error("           [proxyPassword=<password>] <filename>");
     util.error("   help");
@@ -67,11 +69,17 @@ function conflictingOptionsCheck(options) {
     if (('securitytest' in options) && (('testcase' in options) || ('testsuite' in options))) {
         util.printErrorAndExit('Error: Parameters testsuite and testcase are not allowed when securitytest is used');
     }
+
     if ('tags' in options) {
         if (('testsuite' in options) || ('testcase' in options)) {
-            util.printErrorAndExit('Error: tags cannot be used together with testcase/testsuite ');
+            util.printErrorAndExit('Error: tags cannot be used together with testcase/testsuite');
         }
     }
+
+    if(('hostAndPort' in options) && ('environment' in options)) {
+        util.printErrorAndExit('Error: environment cannot be used together with hostAndPort');
+    }
+
     if (('testcase' in options)
         && !('testsuite' in options)) {
         util.error('Warning: Specifying testscase without testsuite can cause unpredictable results');
@@ -177,6 +185,12 @@ function getQueryStringFromOptions(options) {
                 queryStringPart = 'tags=' + encodeURI(tags);
                 break;
             }
+            case 'callback':
+                queryStringPart = 'callback=' + encodeURI(options[key]);
+                break;
+            case 'hostAndPort':
+                queryStringPart = 'hostAndPort=' + encodeURI(options[key]);
+                break;
             case 'proxyUser':
                 queryStringPart = 'proxyUsername=' + encodeURI(options[key]);
                 break;
@@ -257,7 +271,6 @@ function executeProject(filename, project, options) {
                         });
                         util.output(path.resolve(projectFilesByLength[0]));
                         let fullPathUpToComposite = path.dirname(path.resolve(projectFilesByLength[0]));
-                        projectRootPath = path.dirname(path.resolve(projectFilesByLength[0]));
                         projectRootPath = path.basename(fullPathUpToComposite);
                         fullPathUpToComposite = path.dirname(fullPathUpToComposite);
 
