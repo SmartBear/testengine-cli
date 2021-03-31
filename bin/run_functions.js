@@ -482,10 +482,7 @@ function executeProject(filename, project, options) {
                         if (config.showProgress)
                             util.output('');
                         util.output("Result: " + status);
-                        if(status === 'FAILED') {
-                            process.exit(1);
-                        }
-                        
+
                         if ((jobId !== null)
                             && ((status !== 'CANCELED')
                                 && (status !== 'PENDING')
@@ -493,6 +490,10 @@ function executeProject(filename, project, options) {
                             if ('output' in options) {
                                 jobs.reportForTestJob(jobId, options['output'], options['reportFileName'], 'format' in options ? options['format'] : "junit");
                             }
+                        }
+
+                        if(status === 'FAILED') {
+                            process.exit(1);
                         }
                     }
                     jobId = null;
