@@ -493,7 +493,7 @@ function executeProject(filename, project, options) {
                         }
 
                         if(status === 'FAILED') {
-                            process.exit(1);
+                            process.exitCode = 1;
                         }
                     }
                     jobId = null;

@@ -231,7 +231,6 @@ function reportForTestJob(testjobId, outputFolder, fileName, format) {
                     util.printErrorAndExit(`Status code: ${response.status}`);
                 } else {
                     util.output('Report created successfully');
-                    process.exit(0);
                 }
             }).send();
         if (stream) {
