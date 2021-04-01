@@ -499,5 +499,6 @@ function executeProject(filename, project, options) {
                     }
                 }
             }
+        }
     );
 }
