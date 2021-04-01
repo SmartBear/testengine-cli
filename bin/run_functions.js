@@ -482,9 +482,6 @@ function executeProject(filename, project, options) {
                         if (config.showProgress)
                             util.output('');
                         util.output("Result: " + status);
-                        if(status === 'FAILED') {
-                            process.exit(1);
-                        }
                         
                         if ((jobId !== null)
                             && ((status !== 'CANCELED')
@@ -496,8 +493,11 @@ function executeProject(filename, project, options) {
                         }
                     }
                     jobId = null;
+
+                    if(status === 'FAILED') {
+                        process.exit(1);
+                    }
                 }
             }
-        }
     );
 }
