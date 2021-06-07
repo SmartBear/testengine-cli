@@ -9,6 +9,7 @@ const auditlog = require('./auditlog_functions');
 const run = require('./run_functions');
 const license = require('./license_functions');
 const jobs = require('./jobs_functions');
+const diagnostics = require('./diagnostics_functions');
 const config = require('./config');
 const util = require('./shared_utils');
 const pjson = require('../package.json');
@@ -17,7 +18,7 @@ const pjson = require('../package.json');
 program
     .version(pjson.version)
     .name("testengine")
-    .usage('[options] <user|auditlog|run|jobs|license> command parameters')
+    .usage('[options] <user|auditlog|run|jobs|license|diagnostics> command parameters')
     .option('-c, --config <filename>', 'Config file for admin tool')
     .option('-q, --quiet', 'Run in quiet mode. Do not write to console')
     .option('-u, --username <username>', 'TestEngine username')
@@ -58,6 +59,9 @@ if (program.args.length > 0) {
             break;
         case 'license':
             license.dispatcher(program.args.slice(1));
+            break;
+        case 'diagnostics':
+            diagnostics.dispatcher(program.args.slice(1));
             break;
         default:
             program.outputHelp();
