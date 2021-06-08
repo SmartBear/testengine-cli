@@ -11,7 +11,7 @@ module.exports.dispatcher = function (args) {
     }
     switch (args[0].toLowerCase()) {
         case 'run': {
-            let options = util.optionsFromArgs(args.splice(1), ['output', 'reportFileName']);
+            const options = util.optionsFromArgs(args.splice(1), ['output', 'reportFileName']);
             runDiagnostics(options['output'], options['reportFileName']);
             break;
         }
@@ -24,7 +24,7 @@ module.exports.dispatcher = function (args) {
 }
 
 function runDiagnostics(outputFolder, fileName) {
-    let endPoint = config.server + '/api/v1/diagnostics';
+    const endPoint = config.server + '/api/v1/diagnostics';
     let reportFileName = "diagnostics.zip";
 
     if (outputFolder) {
@@ -34,9 +34,9 @@ function runDiagnostics(outputFolder, fileName) {
     }
 
     reportFileName = (outputFolder ? outputFolder + '/' : '') + (fileName ? fileName : reportFileName);
-    let stream = fs.createWriteStream(reportFileName);
+    const stream = fs.createWriteStream(reportFileName);
 
-    let req = request.get(endPoint)
+    const req = request.get(endPoint)
         .auth(config.username, config.password)
         .accept("application/zip").on('response', function (response) {
             if (response.status !== 200) {
