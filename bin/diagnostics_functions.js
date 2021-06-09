@@ -34,7 +34,10 @@ function runDiagnostics(outputFolder, fileName) {
         }
     }
 
-    reportFileName = (outputFolder ? outputFolder + '/' : '') + (fileName ? fileName : reportFileName) + (fileName.endsWith(".zip") ? '' : '.zip');
+    reportFileName = (outputFolder ? outputFolder + '/' : '') + (fileName ? fileName : reportFileName);
+    if(!reportFileName.endsWith(".zip")) {
+        reportFileName += ".zip";
+    }
     const stream = fs.createWriteStream(reportFileName);
 
     const req = request.get(endPoint)
