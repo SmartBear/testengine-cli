@@ -253,6 +253,6 @@ zip-archive is going to be created.
 
 Example:
 ```
-$ node bin/testengine.js diagnostics run output=some/folder reportFileName=report -u admin -p password -H http://localhost:8080
+$ testengine diagnostics run output=some/folder reportFileName=report -u admin -p password -H http://localhost:8080
 Diagnostics report /home/björn/some/folder/report.zip created successfully
 ```
