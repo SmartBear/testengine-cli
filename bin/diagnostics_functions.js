@@ -3,6 +3,7 @@ const util = require('./shared_utils');
 const config = require('./config').config;
 const request = require('superagent');
 const fs = require('fs');
+const resolve = require('path').resolve;
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0) {
@@ -33,17 +34,22 @@ function runDiagnostics(outputFolder, fileName) {
         }
     }
 
-    reportFileName = (outputFolder ? outputFolder + '/' : '') + (fileName ? fileName : reportFileName);
+    reportFileName = (outputFolder ? outputFolder + '/' : '') + (fileName ? fileName : reportFileName) + (fileName.endsWith(".zip") ? '' : '.zip');
     const stream = fs.createWriteStream(reportFileName);
 
     const req = request.get(endPoint)
         .auth(config.username, config.password)
-        .accept("application/zip").on('response', function (response) {
+        .accept("application/zip")
+        .on('response', function (response) {
             if (response.status !== 200) {
                 util.printErrorAndExit(`Status code: ${response.status}`);
             } else {
-                util.output('Diagnostics report created successfully');
+                util.output('Diagnostics report ' + resolve(reportFileName) + ' created successfully');
             }
+        })
+        .on('error', function (err) {
+            util.error("Error: " + err.message);
+            process.exit(1);
         }).send();
 
     req.pipe(stream);

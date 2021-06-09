@@ -241,3 +241,18 @@ To uninstall, you use the uninstall command.
 `testengine license install type=floating <ip-address|hostname>:1099`
 
 A fixed license will be deactivated and a floating license will be checked back in to the floating license server. 
+
+### Create a diagnostics report
+A diagnostics report is a zip-archive containing information about a running testengine instance that a testengine dev
+needs when troubleshooting testengine. This diagnostics report can be created with the following command.
+
+`testengine diagnostics run [reportFileName=fileName] [output=outputDirectory]`
+
+`reportFileName` is the file name of the zip-archive excluding extension and `output` is the folder where the 
+zip-archive is going to be created.
+
+Example:
+```
+$ node bin/testengine.js diagnostics run output=some/folder reportFileName=report -u admin -p password -H http://localhost:8080
+Diagnostics report /home/björn/some/folder/report.zip created successfully
+```
