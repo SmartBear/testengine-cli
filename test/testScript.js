@@ -128,7 +128,13 @@ let jobCommands = ['jobs status',
     'jobs report output=output reportFileName=report format=pdf',
     'jobs report output=. reportFileName=report format=noneExisting'];
 
+let diagnosticCommands = [
+    'diagnostics version',
+    'diagnostics help'
+]
+
 runAllCombinations(commands, flags, (command, flag) => runCli(command, flag));
 let testJobId = startJob('successful.xml');
 runAllCombinations(jobCommands, flags, (command, flag) => runCli(command, flag, testJobId));
 runAllCombinations(['jobs cancel'], flags, startSlowJobAndThenRunCli);
+runAllCombinations(diagnosticCommands, ['-H http://localhost:8080'], runCli);

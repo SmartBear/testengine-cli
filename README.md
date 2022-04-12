@@ -242,6 +242,15 @@ To uninstall, you use the uninstall command.
 
 A fixed license will be deactivated and a floating license will be checked back in to the floating license server. 
 
+## Diagnostics
+
+### Display the TestEngine version
+To check the version of TestEngine, use the diagnostics version command.
+
+`testengine diagnostics version`
+
+Note that `testengine --version` only returns the version of this CLI, not the TestEngine server.
+
 ### Create a diagnostics report
 A diagnostics report is a zip-archive containing information about a running testengine instance that a testengine dev
 needs when troubleshooting testengine. This diagnostics report can be created with the following command.
