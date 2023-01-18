@@ -16,7 +16,7 @@
     "url": "https://github.com/SmartBear/testengine-cli.git"
   },
   "dependencies": {
-    "async": "2.6.3",
+    "async": "3.2.4",
     "commander": "2.20.0",
     "csvtojson": "2.0.10",
     "fast-xml-parser": "3.12.19",
