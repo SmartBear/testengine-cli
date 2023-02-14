@@ -19,7 +19,7 @@
     "async": "2.6.3",
     "commander": "2.20.0",
     "csvtojson": "2.0.10",
-    "fast-xml-parser": "3.12.19",
+    "fast-xml-parser": "4.1.2",
     "fs": "0.0.1-security",
     "jszip": "3.2.2",
     "sprintf-js": "1.1.2",
