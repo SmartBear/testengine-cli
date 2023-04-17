@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "async": "2.6.3",
-    "commander": "2.20.0",
+    "commander": "10.0.1",
     "csvtojson": "2.0.10",
     "fast-xml-parser": "3.12.19",
     "fs": "0.0.1-security",
