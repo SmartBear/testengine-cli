@@ -240,6 +240,9 @@ function handleError(err, result) {
 }
 
 function licenseInfoToString(licenseInfo) {
+    if(licenseInfo.issuer === "NO_LICENSE") {
+        return "No license installed"
+    }
     if (licenseInfo.issuer === "SLM") {
         return "License ID:              " + licenseInfo['licenseNumber'] + "\n" +
           "Expires:                 " + licenseInfo['expirationDate'] + "\n" +
