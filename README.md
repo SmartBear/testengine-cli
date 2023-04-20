@@ -231,15 +231,15 @@ a good idea to first uninstall it.
    
 ### Install a floating license
 To install a fixed license, specify `type=floating`, and the location of the floating license server (typically an IP 
-and port 1099)
+and port 443)
 
-`testengine license install type=floating <ip-address|hostname>:1099`
+`testengine license install type=floating <ip-address|hostname>:443`
 
 ### Install an SLM license
 To install an SLM license, specify `type=slm`, and then options `accessKey` or `licenseServer` or both to specify from
 where you wish to check out your SLM license.
 
-`testengine license install type=slm accessKey=c5c4f014-4745-44a8-bfab-c0df7c66c5a7 licenseServer=https://mySlmServer:443`
+`testengine license install type=slm accessKey=c5c4f014-4745-44a8-bfab-c0df7c66c5a7 licenseServer=https://mySlmServer:40892`
 
 ### Uninstall a license (floating or fixed)
 To uninstall, you use the uninstall command.
