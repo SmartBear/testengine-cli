@@ -16,16 +16,16 @@ module.exports.dispatcher = function (args) {
     switch (args[0].toLowerCase()) {
         case 'install': {
             let argsWithoutFilename;
-            let shouldInstallSlm = isSlm(args);
+            let shouldInstallSlm = args.includes("type=slm");
             if (shouldInstallSlm) {
-                argsWithoutFilename = args.splice(1, args.length - 1);
+                argsWithoutFilename = args.slice(1, args.length);
             } else {
                 if (args.length < 2) {
                     util.error("When installing a JPROD license licensefile or host:port is mandatory.")
                     printModuleHelp();
                     process.exit(1);
                 }
-                argsWithoutFilename = args.splice(1, args.length - 2);
+                argsWithoutFilename = args.slice(1, args.length - 1);
             }
             let options = util.optionsFromArgs(argsWithoutFilename, [
                 'licenseServer',
@@ -56,15 +56,6 @@ module.exports.dispatcher = function (args) {
             util.printErrorAndExit("Unknown operation");
     }
 };
-
-function isSlm(args) {
-    for (let i in args) {
-        if (args[i] === "type=slm") {
-            return true;
-        }
-    }
-    return false;
-}
 
 function printModuleHelp() {
     util.error("Usage: testengine license <command>");
