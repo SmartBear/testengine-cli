@@ -237,7 +237,8 @@ and port 443)
 
 ### Install an SLM license
 To install an SLM license, specify `type=slm`, and then options `accessKey` or `licenseServer` or both to specify from
-where you wish to check out your SLM license.
+where you wish to check out your SLM license. If port is not specified it will automatically add default port for server 
+on-premise 40892.
 
 `testengine license install type=slm accessKey=c5c4f014-4745-44a8-bfab-c0df7c66c5a7 licenseServer=https://mySlmServer:40892`
 
