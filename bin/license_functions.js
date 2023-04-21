@@ -15,18 +15,26 @@ module.exports.dispatcher = function (args) {
 
     switch (args[0].toLowerCase()) {
         case 'install': {
-            let argsWithoutFilename = args.splice(1, args.length - 2);
+            let argsWithoutFilename;
+            let shouldInstallSlm = args.includes("type=slm");
+            if (shouldInstallSlm) {
+                argsWithoutFilename = args.slice(1, args.length);
+            } else {
+                if (args.length < 2) {
+                    util.error("When installing a JPROD license licensefile or host:port is mandatory.")
+                    printModuleHelp();
+                    process.exit(1);
+                }
+                argsWithoutFilename = args.slice(1, args.length - 1);
+            }
             let options = util.optionsFromArgs(argsWithoutFilename, [
+                'licenseServer',
+                'accessKey',
                 'type',
                 'lastName',
                 'firstName',
                 'email']);
-            if (args.length < 2) {
-                printModuleHelp();
-                process.exit(1);
-            } else {
-                installLicense(options, args[args.length - 1]);
-            }
+            installLicense(options, shouldInstallSlm ? null : args[args.length - 1]);
             break;
         }
         case 'uninstall':
@@ -53,8 +61,8 @@ function printModuleHelp() {
     util.error("Usage: testengine license <command>");
     util.error("Commands: ");
     util.error("   info");
-    util.error("   install type=<fixed|floating> [lastName=<name>] [firstName=<firstName>] ");
-    util.error("              [email=<email-address>] <licensefile|host:port>");
+    util.error("   install type=<fixed|floating|slm> [lastName=<name>] [firstName=<firstName>] [email=<email-address>]");
+    util.error("              [licenseServer=<slmLicenseServer] [accessKey=<slmAccessKey>] [<licensefile|host:port>]");
     util.error("   uninstall");
     util.error("   help");
 }
@@ -71,33 +79,58 @@ function installLicense(options, licenseOrLicenseServer) {
         case 'fixed':
             installFixedLicense(options, licenseOrLicenseServer);
             break;
+        case 'slm':
+            if (!options.accessKey && !options.licenseServer) {
+                util.error("At least one of the options accessKey or licenseServer needs to be specified when installing" +
+                  "an SLM license");
+            }
+            installSlmLicense(options)
+            break;
         default:
-            util.printErrorAndExit("Error: Specifying fixed or floating license is mandatory");
+            util.printErrorAndExit("Error: Specifying fixed, floating or slm license is mandatory");
     }
+}
+
+function installSlmLicense(options) {
+    let endPoint = config.server + '/api/v1/license';
+    let payload = {
+        'issuer': 'SLM'
+    };
+    if (options.licenseServer) {
+        payload['server'] = options.licenseServer;
+    }
+    if (options.accessKey) {
+        payload['accessKey'] = options.accessKey;
+    }
+    request.post(endPoint)
+      .auth(config.username, config.password)
+      .accept('application/json')
+      .type('application/json')
+      .send(payload)
+      .end((err, result) => {
+          if (err === null) {
+              util.output("The following license was installed:");
+              util.output(licenseInfoToString(result.body))
+          } else {
+              handleError(err, result);
+          }
+      });
 }
 
 function uninstallLicense() {
     let endPoint = config.server + '/api/v1/license';
     request.delete(endPoint)
-        .auth(config.username, config.password)
-        .accept('application/json')
-        .type('application/json')
-        .send()
-        .end((err, result) => {
-            if (err === null) {
-                util.output("License successfully uninstalled");
-            } else {
-                if ('status' in err) {
-                    switch (err['status']) {
-                        case 403:
-                            util.printErrorAndExit("User doesn't have permission to uninstall a license");
-                            break;
-                        default:
-                            util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
-                    }
-                }
-            }
-        });
+      .auth(config.username, config.password)
+      .accept('application/json')
+      .type('application/json')
+      .send()
+      .end((err, result) => {
+          if (err === null) {
+              util.output("License successfully uninstalled");
+          } else {
+              handleError(err, result);
+          }
+      });
 }
 
 function installFixedLicense(options, licenseFile) {
@@ -112,37 +145,19 @@ function installFixedLicense(options, licenseFile) {
     readStream.on('open', function () {
         let buffer = Buffer.from(JSON.stringify(activationInfo), 'utf8');
         request.post(endPoint)
-            .auth(config.username, config.password)
-            .accept('application/json')
-            .type('multipart/form-data')
-            .attach('file', licenseFile)
-            .attach('activationInfo', buffer, "data.json")
-            .end((err, result) => {
-                if (err === null) {
-                    util.output("The following license was installed:");
-                    util.output(licenseInfoToString(result.body))
-                } else {
-                    if ('status' in err) {
-                        switch (err['status']) {
-                            case 403:
-                                util.printErrorAndExit("User doesn't have permission to install a license");
-                                break;
-                            case 400:
-                                util.printErrorAndExit("Failed to install license, error: " + result.body['message']);
-                                break;
-                            default:
-                                if ('message' in result.body) {
-                                    util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
-                                } else {
-                                    util.printErrorAndExit(err['status'] + ': ' + err['message']);
-                                }
-                                return;
-                        }
-                    } else {
-                        util.printErrorAndExit(err);
-                    }
-                }
-            });
+          .auth(config.username, config.password)
+          .accept('application/json')
+          .type('multipart/form-data')
+          .attach('file', licenseFile)
+          .attach('activationInfo', buffer, "data.json")
+          .end((err, result) => {
+              if (err === null) {
+                  util.output("The following license was installed:");
+                  util.output(licenseInfoToString(result.body))
+              } else {
+                  handleError(err, result)
+              }
+          });
     });
     readStream.on('error', function (err) {
         util.error("Error: " + err.message);
@@ -162,69 +177,72 @@ function installFloatingLicense(licenseServerHost, licenseServerPort) {
         'port': licenseServerPort
     };
     request.post(endPoint)
-        .auth(config.username, config.password)
-        .accept('application/json')
-        .type('application/json')
-        .send(payload)
-        .end((err, result) => {
-            if (err === null) {
-                util.output("The following license was installed:");
-                util.output(licenseInfoToString(result.body))
-            } else {
-                if ('status' in err) {
-                    switch (err['status']) {
-                        case 403:
-                            util.printErrorAndExit("User doesn't have enough credentials to install a license");
-                            break;
-                        case 400:
-                            util.printErrorAndExit("Failed to install license, error: " + result.body['message']);
-                            break;
-                        default:
-                            util.printErrorAndExit(err['status'] + ': ' + err['message']);
-                    }
-                } else {
-                    util.printErrorAndExit(err);
-                }
-            }
-        });
+      .auth(config.username, config.password)
+      .accept('application/json')
+      .type('application/json')
+      .send(payload)
+      .end((err, result) => {
+          if (err === null) {
+              util.output("The following license was installed:");
+              util.output(licenseInfoToString(result.body))
+          } else {
+              handleError(err, result);
+          }
+      });
 }
 
 function showLicenseInfo() {
     let endPoint = config.server + '/api/v1/license';
     request.get(endPoint)
-        .auth(config.username, config.password)
-        .accept('application/json')
-        .type('application/json')
-        .send()
-        .end((err, result) => {
-            if (err === null) {
-                util.output("Current license:");
-                util.output(licenseInfoToString(result.body))
-            } else {
-                if ('status' in err) {
-                    switch (err['status']) {
-                        case 401:
-                        case 403:
-                            util.printErrorAndExit("User doesn't have credentials to show license");
-                            break;
-                        case 404:
-                            util.printErrorAndExit("No license installed");
-                            break;
-                        default:
-                            util.printErrorAndExit(err['status'] + ': ' + err['message']);
-                    }
-                } else {
-                    util.printErrorAndExit(err);
-                }
-            }
-        });
+      .auth(config.username, config.password)
+      .accept('application/json')
+      .type('application/json')
+      .send()
+      .end((err, result) => {
+          if (err === null) {
+              util.output("Current license:");
+              util.output(licenseInfoToString(result.body))
+          } else {
+              handleError(err, result);
+          }
+      });
 
 }
 
+function handleError(err, result) {
+    if ('status' in err) {
+        switch (err['status']) {
+            case 400:
+                util.printErrorAndExit(result.body['message']);
+                break;
+            case 401:
+            case 403:
+                util.printErrorAndExit("User doesn't have credentials to show license");
+                break;
+            case 404:
+                util.printErrorAndExit("No license installed");
+                break;
+            default:
+                util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
+        }
+    } else {
+        util.printErrorAndExit(err);
+    }
+}
+
 function licenseInfoToString(licenseInfo) {
-    return "License ID:              " + licenseInfo['licenseId'] + "\n" +
-        "Licensed to user:        " + licenseInfo['userName'] + "\n" +
-        "Organization:            " + licenseInfo['organization'] + "\n" +
-        "Expires:                 " + licenseInfo['expireDate'] + "\n" +
-        "Max Concurrent TestJobs: " + licenseInfo['maxConcurrentJobs'];
+    if(licenseInfo.issuer === "NO_LICENSE") {
+        return "No license installed"
+    }
+    if (licenseInfo.issuer === "SLM") {
+        return "License ID:              " + licenseInfo['licenseNumber'] + "\n" +
+          "Expires:                 " + licenseInfo['expirationDate'] + "\n" +
+          "Max Concurrent TestJobs: " + licenseInfo['properties']['maxConcurrentJobs'];
+    } else {
+        return "License ID:              " + licenseInfo['licenseId'] + "\n" +
+          "Licensed to user:        " + licenseInfo['userName'] + "\n" +
+          "Organization:            " + licenseInfo['organization'] + "\n" +
+          "Expires:                 " + licenseInfo['expireDate'] + "\n" +
+          "Max Concurrent TestJobs: " + licenseInfo['maxConcurrentJobs'];
+    }
 }
