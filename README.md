@@ -236,13 +236,16 @@ and port 443)
 `testengine license install type=floating <ip-address|hostname>:443`
 
 ### Install an SLM license
-To install an SLM license, specify `type=slm`, and then options `accessKey` or `licenseServer` or both to specify from
-where you wish to check out your SLM license. If port is not specified it will automatically add default port for server 
+To install an SLM license, specify `type=slm`, and then options:
+- `accessKey` for SmartBear hosted license. There is no need to provide `licenseServer` for SmartBear hosted licenses.
+- `accessKey` and `licenseServer` for on-premise hosted licenses. If port is not specified it will automatically add default port for server 
 on-premise 40892.
+
+`testengine license install type=slm accessKey=c5c4f014-4745-44a8-bfab-c0df7c66c5a7`
 
 `testengine license install type=slm accessKey=c5c4f014-4745-44a8-bfab-c0df7c66c5a7 licenseServer=https://mySlmServer:40892`
 
-### Uninstall a license (floating or fixed)
+### Uninstall a license (floating, fixed or SLM)
 To uninstall, you use the uninstall command.
 
 `testengine license uninstall`
