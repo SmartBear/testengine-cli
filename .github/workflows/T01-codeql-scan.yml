@@ -2,8 +2,8 @@ name: T01. CodeQL Scan
 on:
   workflow_dispatch:
     inputs: {}
-  schedule:
-    - cron: '0 23 * * 0'
+  push:
+    branches: [ "master" ]
 jobs:
   analyze:
     name: CodeQL Scan
