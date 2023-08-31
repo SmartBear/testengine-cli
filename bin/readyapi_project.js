@@ -1,18 +1,18 @@
 'use strict';
 
 const util = require('./shared_utils');
-const parser = require('fast-xml-parser');
+const { XMLParser } = require("fast-xml-parser");
 const fs = require('fs');
 const path = require('path');
 
 const xmlParserOptions = {
     attributeNamePrefix: "@_",
-    attrNodeName: "attr", //default is 'false'
+    attributesGroupName: "attr", //default is 'false'
     textNodeName: "#text",
     ignoreAttributes: false,
-    ignoreNameSpace: false,
+    removeNSPrefix: false,
     allowBooleanAttributes: false,
-    parseNodeValue: true,
+    parseTagValue: true,
     parseAttributeValue: false,
     trimValues: true,
     cdataTagName: "__cdata", //default is 'false'
@@ -20,6 +20,8 @@ const xmlParserOptions = {
     localeRange: "", //To support non english character in tag/attribute values.
     parseTrueNumberOnly: false
 };
+
+const parser = new XMLParser(xmlParserOptions);
 
 module.exports.parse = function (filename) {
     let result = null;
