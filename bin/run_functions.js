@@ -426,7 +426,7 @@ function executeProject(filename, project, options) {
                 }
                 let counter = 0;
                 async.whilst(
-                    function () {
+                    async function () {
                         return ((jobId !== null)
                             && ((status !== 'CANCELED')
                                 && (status !== 'PENDING')
