@@ -223,12 +223,12 @@ function printErrors(testjobId) {
     let endPoint = config.server + '/api/v1/testjobs';
     const url = endPoint + '/' + testjobId + '/report';
     request.get(url)
-        .auth("admin", "admin")
+        .auth(config.username, config.password)
         .accept('application/json')
         .send()
         .end((err, res) => {
             const message = [];
-            
+
             const testSuiteResultReports = res.body.testSuiteResultReports;
             for (const testSuiteResultReport of testSuiteResultReports) {
                 const testCaseResultReports = testSuiteResultReport.testCaseResultReports;
