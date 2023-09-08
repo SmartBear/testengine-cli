@@ -16,6 +16,10 @@ module.exports.dispatcher = function (args) {
             runDiagnostics(options['output'], options['reportFileName']);
             break;
         }
+        case 'version': {
+            runVersion();
+            break;
+        }
         case 'help':
             printModuleHelp();
             break;
@@ -58,9 +62,33 @@ function runDiagnostics(outputFolder, fileName) {
     req.pipe(stream);
 }
 
+function runVersion() {
+    const endPoint = config.server + '/api/v1/version';
+    request.get(endPoint)
+        .auth(config.username, config.password)
+        .accept('application/json')
+        .send()
+        .end((err, result) => {
+            if (err !== null) {
+                if (('status' in err) && ('message' in result.body)) {
+                    util.printErrorAndExit(err['status'] + ': ' + result.body['message']);
+                } else {
+                    util.printErrorAndExit(err);
+                }
+            } else {
+                if ('version' in result.body) {
+                    util.output(result.body.version);
+                } else {
+                    util.printErrorAndExit('Failed to retrieve version');
+                }
+            }
+        });
+}
+
 function printModuleHelp() {
     util.error("Usage: testengine diagnostics <command>");
     util.error("Commands: ");
     util.error("   run [output=<directory>] [reportFileName=<filename>]");
+    util.error("   version");
     util.error("   help");
 }
