@@ -219,6 +219,33 @@ function getQueryStringFromOptions(options) {
     return queryString;
 }
 
+function printErrors(testjobId) {
+    let endPoint = config.server + '/api/v1/testjobs';
+    const url = endPoint + '/' + testjobId + '/report';
+    request.get(url)
+        .auth(config.username, config.password)
+        .accept('application/json')
+        .send()
+        .end((err, res) => {
+            const message = [];
+
+            const testSuiteResultReports = res.body.testSuiteResultReports;
+            for (const testSuiteResultReport of testSuiteResultReports) {
+                const testCaseResultReports = testSuiteResultReport.testCaseResultReports;
+                for (const testCaseResultReport of testCaseResultReports) {
+                    const testStepResultReports = testCaseResultReport.testStepResultReports;
+                    for (const testStepResultReport of testStepResultReports) {
+                        const stepMessages = testStepResultReport.messages;
+                        message.push(...stepMessages);
+                    }
+                }
+            }
+            if (message.toString() !== "") {
+                util.output("Error: " + message);
+            }
+        });
+}
+
 function executeProject(filename, project, options) {
     let projectFile = null;
     let isZipFile = false;
@@ -496,6 +523,7 @@ function executeProject(filename, project, options) {
                             process.exitCode = 1;
                         }
                     }
+                    printErrors(jobId);
                     jobId = null;
                 }
             }
