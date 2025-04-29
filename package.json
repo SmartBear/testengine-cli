@@ -1,6 +1,6 @@
 {
   "name": "testengine-cli",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "CLI for SmartBear ReadyAPI TestEngine",
   "scripts": {
     "testengine": "bin/testengine.js",
@@ -19,13 +19,13 @@
     "async": "3.2.4",
     "commander": "2.20.0",
     "csvtojson": "2.0.10",
-    "fast-xml-parser": "4.2.4",
+    "fast-xml-parser": "4.4.1",
     "fs": "0.0.1-security",
-    "jszip": "3.2.2",
+    "jszip": "3.8.0",
     "sprintf-js": "1.1.2",
     "superagent": "6.1.0",
     "tmp": "0.1.0",
-    "ws": "6.2.1"
+    "ws": "6.2.3"
   },
   "devDependencies": {
     "eslint": "5.16.0"
