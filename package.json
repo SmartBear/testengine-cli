@@ -23,7 +23,7 @@
     "fs": "0.0.1-security",
     "jszip": "3.8.0",
     "sprintf-js": "1.1.2",
-    "superagent": "6.1.0",
+    "superagent": "10.2.1",
     "tmp": "0.1.0",
     "ws": "6.2.3"
   },
