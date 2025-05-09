@@ -2,7 +2,8 @@
 
 'use strict';
 
-const program = require('commander');
+const { Command } = require('commander');
+const program = new Command();
 const process = require('process');
 const user = require('./user_functions');
 const auditlog = require('./auditlog_functions');
@@ -26,47 +27,47 @@ program
     .option('-H, --host <hostname>', 'TestEngine host/url')
     .option('-v, --verbose', 'Enable Verbose output')
     .option('-P, --progress', 'Indicate progress')
+    .argument('<module>', 'Main module: user, auditlog, run, jobs, license, diagnostics')
+    .argument('[args...]', 'Arguments passed to selected module')
     .parse(process.argv);
 
-if (program.args.length === 0) {
-    program.outputHelp();
-    return
-}
+const [mainCommand, ...restArgs] = program.args;
 
-config.init();
+program.parse(process.argv);
+const options = program.opts();
+
+config.init(options);
 
 if (config.config.showHelp) {
     program.outputHelp();
-    return
+    return;
 }
 
-if (config.config.verbose)
+if (config.config.verbose) {
     util.output("Using TestEngine at " + config.config.server);
-
-if (program.args.length > 0) {
-    switch (program.args[0]) {
-        case 'user':
-            user.dispatcher(program.args.slice(1));
-            break;
-        case 'auditlog':
-            auditlog.dispatcher(program.args.slice(1));
-            break;
-        case 'run':
-            run.dispatcher(program.args.slice(1));
-            break;
-        case 'jobs':
-            jobs.dispatcher(program.args.slice(1));
-            break;
-        case 'license':
-            license.dispatcher(program.args.slice(1));
-            break;
-        case 'diagnostics':
-            diagnostics.dispatcher(program.args.slice(1));
-            break;
-        default:
-            program.outputHelp();
-            process.exit(1);
-            break;
-    }
 }
 
+switch (mainCommand) {
+    case 'user':
+        user.dispatcher(restArgs);
+        break;
+    case 'auditlog':
+        auditlog.dispatcher(restArgs);
+        break;
+    case 'run':
+        run.dispatcher(restArgs);
+        break;
+    case 'jobs':
+        jobs.dispatcher(restArgs);
+        break;
+    case 'license':
+        license.dispatcher(restArgs);
+        break;
+    case 'diagnostics':
+        diagnostics.dispatcher(restArgs);
+        break;
+    default:
+        console.error(`Unknown module: ${mainCommand}`);
+        program.outputHelp();
+        process.exit(1);
+}
