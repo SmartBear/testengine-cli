@@ -7,6 +7,7 @@ const csv = require('csvtojson');
 const fs = require('fs');
 const util = require('./shared_utils');
 const process = require('process');
+const crypto = require('crypto');
 
 module.exports.dispatcher = function (args) {
     if (args.length === 0) {
@@ -249,6 +250,14 @@ function dumpArrayAsCSV(array) {
 }
 
 function createRandomPassword(length = 8) {
-    return Math.random().toString(36).slice(-1 * length);
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const charsLength = chars.length;
+    let password = '';
+    const bytes = crypto.randomBytes(length);
 
+    for (let i = 0; i < length; i++) {
+        password += chars[bytes[i] % charsLength];
+    }
+
+    return password;
 }

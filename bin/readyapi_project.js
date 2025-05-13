@@ -117,7 +117,7 @@ function getCompositeTestSuites(pathname, jsonProject) {
     let parsedDirectories = {};
 
     for (let line of content) {
-        jsonProject['projectFiles'].push(pathname + path.sep + line.replace(/[\\]/, path.sep));
+        jsonProject['projectFiles'].push(pathname + path.sep + line.replace(/[\\]/g, path.sep));
         let parts = line.split(/[\\]/);
         if (!(parts[0] in parsedDirectories)) {
             parsedDirectories[parts[0]] = parts[0];

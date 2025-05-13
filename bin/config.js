@@ -1,6 +1,5 @@
 'use strict';
 
-const program = require('commander');
 const fs = require('fs');
 const os = require('os');
 const process = require('process');
@@ -16,63 +15,52 @@ let config = {
 };
 
 function readConfigFromFile(filename) {
-    let fileConfig = JSON.parse(fs.readFileSync(filename));
+    const fileConfig = JSON.parse(fs.readFileSync(filename));
     if ('host' in fileConfig) {
-        if (/.*[/]$/.test(fileConfig.host))
-            config.server = fileConfig.host.substr(0, fileConfig.host.length - 1);
-        else
-            config.server = fileConfig.host
+        config.server = fileConfig.host.replace(/\/$/, '');
     }
     if ('username' in fileConfig) {
-        config.username = fileConfig.username
+        config.username = fileConfig.username;
     }
     if ('password' in fileConfig) {
-        config.password = fileConfig.password
+        config.password = fileConfig.password;
     }
 }
 
-function initConfig() {
-
-    if (program.config && fs.existsSync(program.config)) {
-        if (!program.quiet && program.verbose)
-            process.stdout.write('Reading configuration from ' + program.config + '\n');
-        readConfigFromFile(program.config);
-    } else if (fs.existsSync(os.homedir() + '/.testengine.conf')) {
-            if (!program.quiet && program.verbose)
-                process.stdout.write('Reading configuration from ' + os.homedir() + '/.testengine.conf\n');
-            readConfigFromFile(os.homedir() + '/.testengine.conf');
+function initConfig(cliOptions) {
+    if (cliOptions.config && fs.existsSync(cliOptions.config)) {
+        if (!cliOptions.quiet && cliOptions.verbose) {
+            process.stdout.write('Reading configuration from ' + cliOptions.config + '\n');
+        }
+        readConfigFromFile(cliOptions.config);
+    } else {
+        const defaultPath = os.homedir() + '/.testengine.conf';
+        if (fs.existsSync(defaultPath)) {
+            if (!cliOptions.quiet && cliOptions.verbose) {
+                process.stdout.write('Reading configuration from ' + defaultPath + '\n');
+            }
+            readConfigFromFile(defaultPath);
+        }
     }
 
-    if (program.quiet) {
-        config.quiet = true;
+    config.quiet = !!cliOptions.quiet;
+    config.verbose = !!cliOptions.verbose;
+    config.showProgress = !!cliOptions.progress;
+    config.showHelp = process.argv.includes('-h') || process.argv.includes('--help');
+
+    if (cliOptions.username) {
+        config.username = cliOptions.username;
     }
 
-    if (program.verbose) {
-        config.verbose = true;
+    if (cliOptions.password) {
+        config.password = cliOptions.password;
     }
 
-    if (program.progress) {
-        config.showProgress = true;
-    }
-    if (process.argv.indexOf('-h') >= 0) {
-        config.showHelp = true;
-    }
-
-    if (program.username) {
-        config.username = program.username
-    }
-
-    if (program.password) {
-        config.password = program.password
-    }
-
-    if (program.host) {
-        if (program.host.substr(0, 4).toLowerCase() !== 'http')
+    if (cliOptions.host) {
+        if (!cliOptions.host.toLowerCase().startsWith('http')) {
             process.stdout.write("Warning: Host should be a URL starting with http:// or https://\n");
-        if (/.*[/]$/.test(program.host))
-            config.server = program.host.substr(0, program.host.length - 1);
-        else
-            config.server = program.host
+        }
+        config.server = cliOptions.host.replace(/\/$/, '');
     }
 
     if (!config.server) {
@@ -81,13 +69,12 @@ function initConfig() {
     if (!config.username) {
         process.stdout.write("Warning: No user name specified (-u) \n");
     }
-
     if (!config.password) {
         process.stdout.write("Warning: No password specified (-p)\n");
     }
 }
 
 module.exports = {
-    config: config,
+    config,
     init: initConfig
 };
