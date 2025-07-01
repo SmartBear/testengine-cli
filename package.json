@@ -28,6 +28,6 @@
     "ws": "8.18.2"
   },
   "devDependencies": {
-    "eslint": "9.26.0"
+    "eslint": "9.30.1"
   }
 }
