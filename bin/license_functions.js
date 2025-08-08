@@ -19,22 +19,13 @@ module.exports.dispatcher = function (args) {
             let shouldInstallSlm = args.includes("type=slm");
             if (shouldInstallSlm) {
                 argsWithoutFilename = args.slice(1, args.length);
-            } else {
-                if (args.length < 2) {
-                    util.error("When installing a JPROD license licensefile or host:port is mandatory.")
-                    printModuleHelp();
-                    process.exit(1);
-                }
-                argsWithoutFilename = args.slice(1, args.length - 1);
             }
+
             let options = util.optionsFromArgs(argsWithoutFilename, [
                 'licenseServer',
                 'accessKey',
-                'type',
-                'lastName',
-                'firstName',
-                'email']);
-            installLicense(options, shouldInstallSlm ? null : args[args.length - 1]);
+                'type']);
+            installLicense(options);
             break;
         }
         case 'uninstall':
@@ -61,24 +52,13 @@ function printModuleHelp() {
     util.error("Usage: testengine license <command>");
     util.error("Commands: ");
     util.error("   info");
-    util.error("   install type=<fixed|floating|slm> [lastName=<name>] [firstName=<firstName>] [email=<email-address>]");
-    util.error("              [licenseServer=<slmLicenseServer] [accessKey=<slmAccessKey>] [<licensefile|host:port>]");
+    util.error("   install type=slm [licenseServer=<slmLicenseServer] [accessKey=<slmAccessKey>]");
     util.error("   uninstall");
     util.error("   help");
 }
 
-function installLicense(options, licenseOrLicenseServer) {
+function installLicense(options) {
     switch (options['type']) {
-        case 'floating': {
-            let mr = /([^:]*):([0-9]+)/g.exec(licenseOrLicenseServer);
-            if (mr) {
-                installFloatingLicense(mr[1], parseInt(mr[2]));
-            }
-            break;
-        }
-        case 'fixed':
-            installFixedLicense(options, licenseOrLicenseServer);
-            break;
         case 'slm':
             if (!options.accessKey && !options.licenseServer) {
                 util.error("At least one of the options accessKey or licenseServer needs to be specified when installing" +
@@ -87,7 +67,7 @@ function installLicense(options, licenseOrLicenseServer) {
             installSlmLicense(options)
             break;
         default:
-            util.printErrorAndExit("Error: Specifying fixed, floating or slm license is mandatory");
+            util.printErrorAndExit("Error: Specifying slm license is mandatory");
     }
 }
 
@@ -133,63 +113,6 @@ function uninstallLicense() {
       });
 }
 
-function installFixedLicense(options, licenseFile) {
-    let endPoint = config.server + '/api/v1/license';
-    let activationInfo = {};
-    for (let key of ['firstName', 'lastName', 'email']) {
-        if (key in options) {
-            activationInfo[key] = options[key];
-        }
-    }
-    let readStream = fs.createReadStream(licenseFile);
-    readStream.on('open', function () {
-        let buffer = Buffer.from(JSON.stringify(activationInfo), 'utf8');
-        request.post(endPoint)
-          .auth(config.username, config.password)
-          .accept('application/json')
-          .type('multipart/form-data')
-          .attach('file', licenseFile)
-          .attach('activationInfo', buffer, "data.json")
-          .end((err, result) => {
-              if (err === null) {
-                  util.output("The following license was installed:");
-                  util.output(licenseInfoToString(result.body))
-              } else {
-                  handleError(err, result)
-              }
-          });
-    });
-    readStream.on('error', function (err) {
-        util.error("Error: " + err.message);
-        let ext = path.extname(licenseFile).toLowerCase();
-        if ((ext !== '.key') && (ext !== '.zip')) {
-            util.error('"' + licenseFile + '" does not seem to be a .zip or .key file');
-        }
-        process.exit(1);
-    });
-
-}
-
-function installFloatingLicense(licenseServerHost, licenseServerPort) {
-    let endPoint = config.server + '/api/v1/license';
-    let payload = {
-        'host': licenseServerHost,
-        'port': licenseServerPort
-    };
-    request.post(endPoint)
-      .auth(config.username, config.password)
-      .accept('application/json')
-      .type('application/json')
-      .send(payload)
-      .end((err, result) => {
-          if (err === null) {
-              util.output("The following license was installed:");
-              util.output(licenseInfoToString(result.body))
-          } else {
-              handleError(err, result);
-          }
-      });
-}
 
 function showLicenseInfo() {
     let endPoint = config.server + '/api/v1/license';
