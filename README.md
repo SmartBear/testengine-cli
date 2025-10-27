@@ -220,9 +220,6 @@ An administrator can install or uninstall licenses using the TestEngine CLI.
 To check the current license expiry and size, use the license info command.
 `testengine license info`
 
-**Note:** When you install a new license, any existing old license is overwritten without deactivation. It is generally 
-a good idea to first uninstall it.
-
 ### Install an SLM license
 To install an SLM license, specify `type=slm`, and then options:
 - `accessKey` for SmartBear hosted license. There is no need to provide `licenseServer` for SmartBear hosted licenses.
