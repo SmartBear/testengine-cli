@@ -9,6 +9,11 @@
   "bin": {
     "testengine": "bin/testengine.js"
   },
+  "files": [
+    "bin",
+    "LICENSE",
+    "README.md"
+  ],
   "author": "SmartBear Software",
   "license": "Apache-2.0",
   "repository": {
