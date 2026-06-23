@@ -1,6 +1,6 @@
 {
   "name": "testengine-cli",
-  "version": "1.17.0-SNAPSHOT",
+  "version": "1.16.1",
   "description": "CLI for SmartBear ReadyAPI TestEngine",
   "scripts": {
     "testengine": "bin/testengine.js",
@@ -9,6 +9,11 @@
   "bin": {
     "testengine": "bin/testengine.js"
   },
+  "files": [
+    "bin",
+    "LICENSE",
+    "README.md"
+  ],
   "author": "SmartBear Software",
   "license": "Apache-2.0",
   "repository": {
