@@ -1,0 +1,103 @@
+name: T02. Libraries list
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: "TestEngine CLI branch to inspect"
+        required: false
+        default: ""
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        description: "TestEngine CLI branch to inspect"
+        required: false
+        default: ""
+
+env:
+  CYCLONEDX_NPM_VERSION: "6.0.1"
+  CYCLONEDX_CLI_VERSION: "v0.33.1"
+
+jobs:
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          check-latest: true
+          cache: 'npm'
+
+      - name: Resolve project version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Project version: ${VERSION}"
+          echo "TE_VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefer-offline --no-audit
+
+      - name: Install CycloneDX CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$(uname -m)" in
+            x86_64)  ASSET=cyclonedx-linux-x64 ;;
+            aarch64) ASSET=cyclonedx-linux-arm64 ;;
+            *)       echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+          esac
+          curl -sSLf -o /usr/local/bin/cyclonedx \
+            "https://github.com/CycloneDX/cyclonedx-cli/releases/download/${CYCLONEDX_CLI_VERSION}/${ASSET}"
+          chmod +x /usr/local/bin/cyclonedx
+          cyclonedx --version
+
+      - name: Generate CycloneDX SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${GITHUB_WORKSPACE}/sbom"
+          # Runtime dependencies only, transitive included - the dev tree is not shipped.
+          # npm ls reports unmet optional peer dependencies as errors, hence --ignore-npm-errors.
+          npx --yes "@cyclonedx/cyclonedx-npm@${CYCLONEDX_NPM_VERSION}" \
+            --omit dev \
+            --ignore-npm-errors \
+            --output-format JSON \
+            --output-file "${GITHUB_WORKSPACE}/sbom/testengine-cli-sbom-${TE_VERSION}.json"
+          cyclonedx convert \
+            --input-file "${GITHUB_WORKSPACE}/sbom/testengine-cli-sbom-${TE_VERSION}.json" \
+            --output-file "${GITHUB_WORKSPACE}/sbom/testengine-cli-sbom-${TE_VERSION}.xml" \
+            --output-format xml
+          ls -l "${GITHUB_WORKSPACE}/sbom/"
+
+      - name: Generate SPDX SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          cyclonedx convert \
+            --input-file "${GITHUB_WORKSPACE}/sbom/testengine-cli-sbom-${TE_VERSION}.json" \
+            --output-file "${GITHUB_WORKSPACE}/sbom/testengine-cli-sbom-${TE_VERSION}.spdx.json" \
+            --output-format spdxjson
+          ls -l "${GITHUB_WORKSPACE}/sbom/"
+
+      - name: Upload SBOM (CycloneDX + SPDX)
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: testengine-cli-sbom-${{ env.TE_VERSION }}
+          path: sbom/testengine-cli-sbom-${{ env.TE_VERSION }}.*
+          if-no-files-found: error
